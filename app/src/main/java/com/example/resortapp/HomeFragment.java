@@ -57,13 +57,18 @@ public class HomeFragment extends Fragment {
             ((androidx.recyclerview.widget.DefaultItemAnimator) ia).setSupportsChangeAnimations(false);
         }
 
-        adapter = new RoomListAdapter();
+        adapter = new RoomListAdapter(RoomListAdapter.LayoutMode.CARD);
         rv.setAdapter(adapter);
+        adapter.setOnRoomClick(room -> {
+            Intent i = new Intent(requireContext(), RoomDetailActivity.class);
+            i.putExtra("roomId", room.getId());
+            startActivity(i);
+        });
 
         // --- in onCreateView after Rooms setup:
         rvActivities = v.findViewById(R.id.rvActivities);
         rvActivities.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        activitiesAdapter = new RoomListAdapter(); // it binds name/img/price; description can be empty
+        activitiesAdapter = new RoomListAdapter(RoomListAdapter.LayoutMode.CARD); // it binds name/img/price; description can be empty
         rvActivities.setAdapter(activitiesAdapter);
 
 
