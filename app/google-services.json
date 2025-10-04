@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "692316003269",
+    "project_id": "resort-app-5b8dc",
+    "storage_bucket": "resort-app-5b8dc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692316003269:android:6194831d70521a9d8909ac",
+        "android_client_info": {
+          "package_name": "com.example.resortapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwVSx99jzBgCcpDFRG9M8brWmiSC3GDM8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

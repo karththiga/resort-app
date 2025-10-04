@@ -1,0 +1,10 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+    <TextView android:id="@+id/tvTitle" android:text="Activities"
+        android:textStyle="bold" android:textSize="20sp"
+        android:padding="16dp" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAllActivities"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

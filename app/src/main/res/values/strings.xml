@@ -1,0 +1,45 @@
+<resources>
+    <string name="login">Log In</string>
+    <string name="forgot_password_reset">Forgot password? Reset</string>
+    <string name="new_here_sign_up">New here? Sign up</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="hint_email_phone">Phone number or Email</string>
+    <string name="hint_password">Password</string>
+    <string name="app_name">ResortApp</string>
+
+    <string name="greeting">Hi, Guest</string>
+
+    <string name="your_room_pref">Your room preference</string>
+    <string name="view_rooms">View rooms</string>
+
+    <string name="rooms">Rooms</string>
+    <string name="rooms_desc">Browse eco-friendly stays</string>
+
+    <string name="adventures">Adventures</string>
+    <string name="adventures_desc">Guided hikes, eco-tours</string>
+
+    <string name="bookings">My Bookings</string>
+    <string name="bookings_desc">Rooms &amp; activities</string>
+
+    <string name="offers">Offers &amp; Tips</string>
+    <string name="offers_desc">Deals &amp; eco advice</string>
+
+    <string name="green_title">Green Initiatives</string>
+    <string name="green_desc">Solar power, zero-waste, local reserves</string>
+
+    <string name="open">Open</string>
+    <string name="learn_more">Learn more</string>
+
+    <string name="greeting_guest">Hello, Guest</string>
+    <string name="hero_tagline">EcoStay Retreat · Mountain escape</string>
+    <string name="quick_actions">Quick actions</string>
+    <string name="chip_room_bookings">Room bookings</string>
+    <string name="chip_activity_res">Activity reservation</string>
+    <string name="chip_local_nature">Local nature reserves</string>
+    <string name="chip_resort_info">Resort information</string>
+    <string name="cd_hero_resort">Hero image of EcoStay Retreat</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+</resources>

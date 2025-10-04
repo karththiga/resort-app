@@ -1,0 +1,26 @@
+<resources>
+
+    <array name="price_defaults">
+        <item>6000</item>
+        <item>20000</item>
+    </array>
+
+    <string-array name="preference">
+        <item>Mountain-View Cabin</item>
+        <item>Eco-Pod</item>
+        <item>Forest Lodge</item>
+        <item>River-Side Hut</item>
+    </string-array>
+    <string-array name="room_types">
+        <item>eco_pod</item>
+        <item>mountain_view</item>
+        <item>forest_lodge</item>
+        <item>river_side_hut</item>
+    </string-array>
+    <string-array name="room_categories">
+        <item>deluxe</item>
+        <item>double</item>
+        <item>single</item>
+        <item>party</item>
+    </string-array>
+</resources>
