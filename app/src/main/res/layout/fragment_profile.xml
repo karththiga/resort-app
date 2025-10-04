@@ -31,7 +31,7 @@
                     android:padding="20dp"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_profile_avatar"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MaterialComponents.Full"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.ResortApp.Circle"
                     app:strokeColor="@android:color/white"
                     app:strokeWidth="2dp" />
 
