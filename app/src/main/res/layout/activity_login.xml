@@ -1,4 +1,5 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
@@ -36,11 +37,17 @@
             android:inputType="textPassword" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
+        style="@style/AppTheme.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:layout_marginTop="16dp"
+        android:text="Login"
+        app:backgroundTint="@color/purple_primary"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:icon="@drawable/baseline_manage_accounts_24" />
 
     <TextView
         android:id="@+id/tvForgot"
