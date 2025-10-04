@@ -1,37 +1,49 @@
 package com.example.resortapp;
 
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.*;
+import android.util.Patterns;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.*;
-import com.google.firebase.firestore.*;
+
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText etName, etEmail, etPhone, etPassword;
-    private Button btnRegister;
+    private TextInputLayout tilName, tilEmail, tilPhone, tilPassword, tilPreference;
+    private MaterialAutoCompleteTextView etPreference;
     private TextView tvGoLogin;
-
+    private Button btnRegister;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
-    private AutoCompleteTextView etPreference;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        etName = findViewById(R.id.etName);
-        etEmail = findViewById(R.id.etEmail);
-        etPhone = findViewById(R.id.etPhone);
-        etPassword = findViewById(R.id.etPassword);
+        tilName = findViewById(R.id.tilName);
+        tilEmail = findViewById(R.id.tilEmail);
+        tilPhone = findViewById(R.id.tilPhone);
+        tilPassword = findViewById(R.id.tilPassword);
+        tilPreference = findViewById(R.id.tilPreference);
+        etPreference = findViewById(R.id.etPreference);
         btnRegister = findViewById(R.id.btnRegister);
         tvGoLogin = findViewById(R.id.tvGoLogin);
-        etPreference = findViewById(R.id.etPreference);
 
-        // Simple dropdown
         String[] labels = new String[]{"Eco-pods", "Mountain-view cabins", "River side hut"};
         ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, labels);
         etPreference.setAdapter(ad);
@@ -45,25 +57,76 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void doRegister() {
+        EditText etName = (EditText) tilName.getEditText();
+        EditText etEmail = (EditText) tilEmail.getEditText();
+        EditText etPhone = (EditText) tilPhone.getEditText();
+        EditText etPassword = (EditText) tilPassword.getEditText();
+
+        if (etName == null || etEmail == null || etPhone == null || etPassword == null) {
+            Toast.makeText(this, "Unable to read form", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String pass = etPassword.getText().toString();
+        String prefLabel = String.valueOf(etPreference.getText()).trim();
 
-        if (name.isEmpty() || email.isEmpty() || pass.length() < 6) {
-            Toast.makeText(this, "Fill name, email and 6+ char password", Toast.LENGTH_SHORT).show();
+        tilName.setError(null);
+        tilEmail.setError(null);
+        tilPhone.setError(null);
+        tilPassword.setError(null);
+        tilPreference.setError(null);
+
+        if (name.isEmpty()) {
+            tilName.setError("Tell us your name");
+            tilName.requestFocus();
             return;
         }
 
-        String prefLabel = String.valueOf(etPreference.getText());
-        String preferredCategory = mapCategory(prefLabel); // normalize code
+        if (email.isEmpty()) {
+            tilEmail.setError("Email is required");
+            tilEmail.requestFocus();
+            return;
+        }
 
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            tilEmail.setError("Enter a valid email address");
+            tilEmail.requestFocus();
+            return;
+        }
+
+        if (!phone.isEmpty() && !Patterns.PHONE.matcher(phone).matches()) {
+            tilPhone.setError("Enter a valid phone number");
+            tilPhone.requestFocus();
+            return;
+        }
+
+        if (pass.length() < 6) {
+            tilPassword.setError("Create a password with at least 6 characters");
+            tilPassword.requestFocus();
+            return;
+        }
+
+        if (prefLabel.isEmpty()) {
+            tilPreference.setError("Choose a room preference");
+            tilPreference.requestFocus();
+            return;
+        }
+
+        String preferredCategory = mapCategory(prefLabel);
         btnRegister.setEnabled(false);
+
         auth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser fu = auth.getCurrentUser();
-                        if (fu == null) return;
+                        if (fu == null) {
+                            btnRegister.setEnabled(true);
+                            Toast.makeText(this, "Registration failed. Try again.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
                         String uid = fu.getUid();
                         Map<String, Object> doc = new HashMap<>();
@@ -73,7 +136,6 @@ public class RegisterActivity extends AppCompatActivity {
                         doc.put("role", "GUEST");
                         doc.put("preferredRoomType", preferredCategory);
                         doc.put("createdAt", FieldValue.serverTimestamp());
-
 
                         db.collection("users").document(uid).set(doc)
                                 .addOnSuccessListener(unused -> {
@@ -87,13 +149,18 @@ public class RegisterActivity extends AppCompatActivity {
                                 });
                     } else {
                         Exception e = task.getException();
-                        Toast.makeText(this, e != null ? e.getMessage() : "Registration error", Toast.LENGTH_LONG).show();
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            tilEmail.setError("This email is already registered");
+                            tilEmail.requestFocus();
+                        } else {
+                            Toast.makeText(this, e != null ? e.getMessage() : "Registration error", Toast.LENGTH_LONG).show();
+                        }
                         btnRegister.setEnabled(true);
                     }
                 });
     }
 
-    private String mapCategory(String label){
+    private String mapCategory(String label) {
         if (label == null) return null;
         label = label.toLowerCase();
         if (label.contains("eco")) return "eco_pod";
