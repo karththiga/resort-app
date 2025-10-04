@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.resortapp.model.EcoInfo;
 import com.example.resortapp.model.Room;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
 
@@ -26,6 +27,10 @@ public class HomeFragment extends Fragment {
     private RecyclerView rvActivities;
     private RoomListAdapter activitiesAdapter; // reuse adapter class; shows name/img/price
     private ListenerRegistration roomsReg;
+    private ListenerRegistration bookingsReg;
+    private Long travelStartUtc, travelEndUtc;
+    private List<Room> latestRooms = new ArrayList<>();
+    private Set<String> unavailableRoomIds = new HashSet<>();
 
     // Fields
     private RecyclerView rvEco;
@@ -142,7 +147,12 @@ public class HomeFragment extends Fragment {
                 .addSnapshotListener((snap, e) -> {
                     if (e != null || snap == null) return;
                     currentCategoryCode = snap.getString("preferredRoomType");
+                    Timestamp start = snap.getTimestamp("travelStart");
+                    Timestamp end = snap.getTimestamp("travelEnd");
+                    travelStartUtc = start != null ? start.toDate().getTime() : null;
+                    travelEndUtc = end != null ? end.toDate().getTime() : null;
                     subscribeRooms(currentCategoryCode);
+                    subscribeBookings();
                 });
 
         return v;
@@ -198,17 +208,64 @@ public class HomeFragment extends Fragment {
             if (err != null || qs == null) return;
             List<Room> list = new ArrayList<>();
             for (DocumentSnapshot d : qs.getDocuments()) list.add(FirestoreMappers.toRoom(d));
-            adapter.submit(list);
+            latestRooms = list;
+            updateRoomsAdapter();
         });
     }
 
-    @Override public void onDestroyView() {
+    private void subscribeBookings() {
+        if (bookingsReg != null) { bookingsReg.remove(); bookingsReg = null; }
+        if (travelStartUtc == null || travelEndUtc == null) {
+            unavailableRoomIds.clear();
+            updateRoomsAdapter();
+            return;
+        }
+
+        Query q = FirebaseFirestore.getInstance().collection("bookings")
+                .whereEqualTo("status", "CONFIRMED")
+                .whereLessThan("checkIn", new Timestamp(new Date(travelEndUtc)));
+
+        bookingsReg = q.addSnapshotListener((qs, e) -> {
+            if (e != null || qs == null) return;
+            Set<String> busy = new HashSet<>();
+            for (DocumentSnapshot d : qs.getDocuments()) {
+                String kind = d.getString("kind");
+                if (kind != null && !"ROOM".equals(kind)) continue;
+                String roomId = d.getString("roomId");
+                Timestamp checkIn = d.getTimestamp("checkIn");
+                Timestamp checkOut = d.getTimestamp("checkOut");
+                if (roomId == null || checkIn == null || checkOut == null) continue;
+                long ci = checkIn.toDate().getTime();
+                long co = checkOut.toDate().getTime();
+                if (ci < travelEndUtc && co > travelStartUtc) {
+                    busy.add(roomId);
+                }
+            }
+            unavailableRoomIds = busy;
+            updateRoomsAdapter();
+        });
+    }
+
+    private void updateRoomsAdapter() {
+        if (latestRooms == null) return;
+        List<Room> filtered = new ArrayList<>();
+        for (Room r : latestRooms) {
+            if (travelStartUtc != null && travelEndUtc != null && unavailableRoomIds.contains(r.getId())) {
+                continue;
+            }
+            filtered.add(r);
+        }
+        adapter.submit(filtered);
+    }
+
+    @Override
+    public void onDestroyView() {
         super.onDestroyView();
         if (roomsReg != null) { roomsReg.remove(); roomsReg = null; }
+        if (bookingsReg != null) { bookingsReg.remove(); bookingsReg = null; }
         if (activitiesReg != null) { activitiesReg.remove(); activitiesReg = null; }
         if (ecoReg != null) { ecoReg.remove(); ecoReg = null; }
-//        if (rv != null) rv.setAdapter(null);
-//        adapter = null; rv = null;
     }
+
 }
 
