@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.resortapp.model.Room;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.*;
 
 import java.lang.reflect.Field;
@@ -21,6 +22,10 @@ public class ActivitiesListActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_activities_list);
+
+        MaterialToolbar bar = findViewById(R.id.topAppBar);
+        setSupportActionBar(bar);
+        bar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         RecyclerView rv = findViewById(R.id.rvAllActivities);
         rv.setLayoutManager(new LinearLayoutManager(this));
