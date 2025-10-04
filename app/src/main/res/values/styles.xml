@@ -6,11 +6,11 @@
 
     <!-- Your chip style -->
     <style name="MyChipStyle" parent="Widget.Material3.Chip.Filter">
-        <item name="chipBackgroundColor">#E8F5E9</item>
-        <item name="chipStrokeColor">#A5D6A7</item>
+        <item name="chipBackgroundColor">@color/green_light</item>
+        <item name="chipStrokeColor">@color/green_accent</item>
         <item name="chipStrokeWidth">1dp</item>
         <!-- optional -->
-        <item name="rippleColor">#C8E6C9</item>
+        <item name="rippleColor">@color/green_light</item>
     </style>
     <!-- Big, comfy assist chips -->
     <style name="Chip.Big" parent="Widget.Material3.Chip.Assist.Elevated">
@@ -20,8 +20,8 @@
         <item name="chipMinHeight">40dp</item>
         <item name="chipCornerRadius">16dp</item>
         <item name="android:textStyle">bold</item>
-        <item name="chipBackgroundColor">@color/purple_light</item>
-        <item name="chipStrokeColor">@color/purple_primary</item>
+        <item name="chipBackgroundColor">@color/green_light</item>
+        <item name="chipStrokeColor">@color/green_primary</item>
         <item name="chipStrokeWidth">1dp</item>
     </style>
 
