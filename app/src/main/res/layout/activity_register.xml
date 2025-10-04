@@ -80,7 +80,7 @@
                         android:id="@+id/etName"
                         style="@style/Widget.ResortApp.TextInputEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="60dp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -96,7 +96,7 @@
                         android:id="@+id/etEmail"
                         style="@style/Widget.ResortApp.TextInputEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="60dp"
                         android:imeOptions="actionNext"
                         android:inputType="textEmailAddress" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -114,7 +114,7 @@
                         android:id="@+id/etPhone"
                         style="@style/Widget.ResortApp.TextInputEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="60dp"
                         android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -132,7 +132,7 @@
                         android:id="@+id/etPassword"
                         style="@style/Widget.ResortApp.TextInputEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="60dp"
                         android:imeOptions="actionNext"
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -151,7 +151,7 @@
                         android:id="@+id/etPreference"
                         style="@style/Widget.ResortApp.TextInputEditText"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="60dp"
                         android:focusable="false"
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
