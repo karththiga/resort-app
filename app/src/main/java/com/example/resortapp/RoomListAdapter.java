@@ -20,11 +20,17 @@ import java.util.Objects;
 
 public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
 
+    public enum LayoutMode {
+        LIST,
+        CARD
+    }
+
     public interface OnRoomClick {
         void onClick(Room room);
     }
 
     private final List<Room> items = new ArrayList<>();
+    private final LayoutMode layoutMode;
     private OnRoomClick onRoomClick;
 
     public void setOnRoomClick(OnRoomClick cb) {
@@ -32,6 +38,11 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
     }
 
     public RoomListAdapter() {
+        this(LayoutMode.LIST);
+    }
+
+    public RoomListAdapter(LayoutMode layoutMode) {
+        this.layoutMode = layoutMode;
         setHasStableIds(true);
     }
 
@@ -52,11 +63,10 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_room_card, parent, false);
-//        return new VH(v);
-
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_room_list, parent, false);
+        int layout = layoutMode == LayoutMode.CARD
+                ? R.layout.item_room_card
+                : R.layout.item_room_list;
+        View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new VH(v);
     }
 
@@ -64,7 +74,11 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int position) {
         Room r = items.get(position);
         h.name.setText(r.getName() != null ? r.getName() : r.getType());
-        h.desc.setText(r.getDescription());
+        if (h.desc != null) {
+            h.desc.setText(r.getDescription());
+            h.desc.setVisibility(r.getDescription() != null && !r.getDescription().isEmpty()
+                    ? View.VISIBLE : View.GONE);
+        }
         double price = r.getBasePrice() == null ? 0.0 : r.getBasePrice();
         h.price.setText(String.format("LKR %.0f / night", price));
         Glide.with(h.img.getContext()).load(r.getImageUrl()).into(h.img);
@@ -73,7 +87,9 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
             if (onRoomClick != null) onRoomClick.onClick(r);
         };
         h.itemView.setOnClickListener(go);
-        h.btnView.setOnClickListener(go);
+        if (h.btnView != null) {
+            h.btnView.setOnClickListener(go);
+        }
 
 
 //        h.name.setText(r.getName() != null ? r.getName() : r.getType());
