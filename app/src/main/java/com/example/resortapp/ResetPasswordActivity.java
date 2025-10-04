@@ -3,8 +3,14 @@ package com.example.resortapp;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Patterns;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class ResetPasswordActivity extends AppCompatActivity {
@@ -13,14 +19,17 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private Button btnSend;
     private TextView tvBack;
     private FirebaseAuth auth;
+    private TextInputLayout tilEmail;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reset_password);
 
         etEmail = findViewById(R.id.etEmail);
         btnSend = findViewById(R.id.btnSend);
         tvBack  = findViewById(R.id.tvBack);
+        tilEmail = findViewById(R.id.tilEmail);
         auth = FirebaseAuth.getInstance();
 
         btnSend.setOnClickListener(v -> sendReset());
@@ -30,8 +39,17 @@ public class ResetPasswordActivity extends AppCompatActivity {
     private void sendReset() {
         String email = etEmail.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "Enter a valid email", Toast.LENGTH_SHORT).show();
+        tilEmail.setError(null);
+
+        if (TextUtils.isEmpty(email)) {
+            tilEmail.setError("Email is required");
+            tilEmail.requestFocus();
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            tilEmail.setError("Enter a valid email address");
+            tilEmail.requestFocus();
             return;
         }
 
@@ -44,11 +62,12 @@ public class ResetPasswordActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     String msg = e.getMessage();
-                    // Friendly messages for common cases
                     if (msg != null && msg.toLowerCase().contains("no user record")) {
-                        msg = "No account found for this email.";
+                        tilEmail.setError("No account found for this email.");
+                        tilEmail.requestFocus();
+                    } else {
+                        Toast.makeText(this, msg != null ? msg : "Failed to send reset email", Toast.LENGTH_LONG).show();
                     }
-                    Toast.makeText(this, msg != null ? msg : "Failed to send reset email", Toast.LENGTH_LONG).show();
                     btnSend.setEnabled(true);
                 });
     }
