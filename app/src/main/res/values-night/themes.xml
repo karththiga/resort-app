@@ -1,7 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.ResortApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="colorPrimary">@color/green_accent</item>
+        <item name="colorOnPrimary">@color/green_dark</item>
+        <item name="colorPrimaryContainer">@color/green_dark</item>
+        <item name="colorOnPrimaryContainer">@color/green_light</item>
+        <item name="colorSecondary">@color/green_primary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/green_dark</item>
+        <item name="colorOnSecondaryContainer">@color/green_light</item>
+        <item name="colorTertiary">@color/green_primary</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorTertiaryContainer">@color/green_dark</item>
+        <item name="colorOnTertiaryContainer">@color/green_light</item>
+        <item name="colorSurface">@color/green_dark</item>
+        <item name="colorOnSurface">@color/green_light</item>
+        <item name="colorSurfaceVariant">@color/green_primary</item>
+        <item name="colorOnSurfaceVariant">@color/green_light</item>
+        <item name="colorOutline">@color/green_accent</item>
+        <item name="colorPrimaryInverse">@color/green_light</item>
     </style>
 </resources>
