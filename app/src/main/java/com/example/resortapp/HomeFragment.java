@@ -2,6 +2,8 @@ package com.example.resortapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
 import android.view.*;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -106,18 +108,29 @@ public class HomeFragment extends Fragment {
 // Subscribe to eco_info (top 10 by createdAt)
         com.google.firebase.firestore.Query q = com.google.firebase.firestore.FirebaseFirestore.getInstance()
                 .collection("eco_info")
-                .whereEqualTo("status", "ACTIVE")
-                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .limit(10);
+                .whereEqualTo("status", "ACTIVE");
 
         ecoReg = q.addSnapshotListener((qs, e) -> {
-            if (e != null || qs == null) return;
-            java.util.List<EcoInfo> list = new java.util.ArrayList<>();
+            if (e != null || qs == null) {
+                Log.e("HomeFragment", "Eco highlights query failed", e);
+                ecoAdapter.submit(java.util.Collections.emptyList());
+                return;
+            }
+            java.util.List<Pair<EcoInfo, com.google.firebase.Timestamp>> rows = new java.util.ArrayList<>();
             for (com.google.firebase.firestore.DocumentSnapshot d : qs.getDocuments()) {
                 EcoInfo info = d.toObject(EcoInfo.class);
                 if (info == null) continue;
                 info.setId(d.getId());
-                list.add(info);
+                rows.add(Pair.create(info, d.getTimestamp("createdAt")));
+            }
+            rows.sort((a, b) -> {
+                long bTime = b.second != null ? b.second.toDate().getTime() : Long.MIN_VALUE;
+                long aTime = a.second != null ? a.second.toDate().getTime() : Long.MIN_VALUE;
+                return Long.compare(bTime, aTime);
+            });
+            java.util.List<EcoInfo> list = new java.util.ArrayList<>();
+            for (int i = 0; i < rows.size() && i < 10; i++) {
+                list.add(rows.get(i).first);
             }
             ecoAdapter.submit(list);
         });
@@ -168,12 +181,15 @@ public class HomeFragment extends Fragment {
     private void subscribeActivities() {
         if (activitiesReg != null) { activitiesReg.remove(); activitiesReg = null; }
         Query q = FirebaseFirestore.getInstance().collection("activities")
-                .whereEqualTo("status","ACTIVE")
-                .orderBy("pricePerPerson");
+                .whereEqualTo("status","ACTIVE");
         activitiesReg = q.addSnapshotListener( (qs, e) -> {
-            if (e != null || qs == null) return;
+            if (e != null || qs == null) {
+                Log.e("HomeFragment", "Activities query failed", e);
+                activitiesAdapter.submit(java.util.Collections.emptyList());
+                return;
+            }
             // Map Activity docs to a lightweight object your adapter can show.
-            List<Room> list = new ArrayList<>();
+            List<Pair<Room, Double>> rows = new ArrayList<>();
             for (DocumentSnapshot d : qs.getDocuments()) {
                 // reuse Room model fields used by adapter
                 Room r = new Room();
@@ -185,9 +201,23 @@ public class HomeFragment extends Fragment {
                     f.setAccessible(true); f.set(r, d.getString("name")); } catch (Exception ignored) {}
                 try { java.lang.reflect.Field f = Room.class.getDeclaredField("imageUrl");
                     f.setAccessible(true); f.set(r, d.getString("imageUrl")); } catch (Exception ignored) {}
-                try { java.lang.reflect.Field f = Room.class.getDeclaredField("basePrice");
-                    f.setAccessible(true); f.set(r, d.getDouble("pricePerPerson")); } catch (Exception ignored) {}
-                list.add(r);
+                Double price = null;
+                try {
+                    java.lang.reflect.Field f = Room.class.getDeclaredField("basePrice");
+                    f.setAccessible(true);
+                    price = d.getDouble("pricePerPerson");
+                    f.set(r, price);
+                } catch (Exception ignored) {}
+                rows.add(Pair.create(r, price));
+            }
+            rows.sort((a, b) -> {
+                double aPrice = a.second != null ? a.second : Double.MAX_VALUE;
+                double bPrice = b.second != null ? b.second : Double.MAX_VALUE;
+                return Double.compare(aPrice, bPrice);
+            });
+            List<Room> list = new ArrayList<>();
+            for (Pair<Room, Double> row : rows) {
+                list.add(row.first);
             }
             activitiesAdapter.submit(list);
         });

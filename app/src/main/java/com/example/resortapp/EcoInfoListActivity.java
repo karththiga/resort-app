@@ -1,9 +1,9 @@
 package com.example.resortapp;
 
-
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,41 +57,59 @@ public class EcoInfoListActivity extends AppCompatActivity {
 
         Query qInitiatives = db.collection("eco_info")
                 .whereEqualTo("status", "ACTIVE")
-                .whereEqualTo("type", "initiative")
-                .orderBy("createdAt", Query.Direction.DESCENDING);
+                .whereEqualTo("type", "initiative");
 
         Query qReserves = db.collection("eco_info")
                 .whereEqualTo("status", "ACTIVE")
-                .whereEqualTo("type", "nature_reserve")
-                .orderBy("createdAt", Query.Direction.DESCENDING);
+                .whereEqualTo("type", "nature_reserve");
 
         Query qPractices = db.collection("eco_info")
                 .whereEqualTo("status", "ACTIVE")
-                .whereEqualTo("type", "practice")
-                .orderBy("createdAt", Query.Direction.DESCENDING);
+                .whereEqualTo("type", "practice");
 
         // listen & populate (Activity-scoped listeners)
         regInit = qInitiatives.addSnapshotListener(this, (qs, e) -> {
-            if (e != null || qs == null) return;
+            if (e != null || qs == null) {
+                Log.e("EcoInfoList", "Initiatives query failed", e);
+                adInitiatives.submit(Collections.emptyList());
+                return;
+            }
             adInitiatives.submit(map(qs));
         });
         regRes = qReserves.addSnapshotListener(this, (qs, e) -> {
-            if (e != null || qs == null) return;
+            if (e != null || qs == null) {
+                Log.e("EcoInfoList", "Reserves query failed", e);
+                adReserves.submit(Collections.emptyList());
+                return;
+            }
             adReserves.submit(map(qs));
         });
         regPrac = qPractices.addSnapshotListener(this, (qs, e) -> {
-            if (e != null || qs == null) return;
+            if (e != null || qs == null) {
+                Log.e("EcoInfoList", "Practices query failed", e);
+                adPractices.submit(Collections.emptyList());
+                return;
+            }
             adPractices.submit(map(qs));
         });
     }
 
     private List<EcoInfo> map(QuerySnapshot qs) {
-        List<EcoInfo> list = new ArrayList<>();
+        List<Pair<EcoInfo, com.google.firebase.Timestamp>> rows = new ArrayList<>();
         for (DocumentSnapshot d : qs.getDocuments()) {
             EcoInfo e = d.toObject(EcoInfo.class);
             if (e == null) continue;
             e.setId(d.getId());
-            list.add(e);
+            rows.add(Pair.create(e, d.getTimestamp("createdAt")));
+        }
+        rows.sort((a, b) -> {
+            long bTime = b.second != null ? b.second.toDate().getTime() : Long.MIN_VALUE;
+            long aTime = a.second != null ? a.second.toDate().getTime() : Long.MIN_VALUE;
+            return Long.compare(bTime, aTime);
+        });
+        List<EcoInfo> list = new ArrayList<>();
+        for (Pair<EcoInfo, com.google.firebase.Timestamp> row : rows) {
+            list.add(row.first);
         }
         return list;
     }
