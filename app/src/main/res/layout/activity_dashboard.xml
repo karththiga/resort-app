@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:itemIconSize="24dp"
-        app:itemRippleColor="@color/purple_light"
+        app:itemRippleColor="@color/green_light"
         android:background="@android:color/white"
         app:itemIconTint="@color/bottom_nav_colors"
         app:itemTextColor="@color/bottom_nav_colors"
