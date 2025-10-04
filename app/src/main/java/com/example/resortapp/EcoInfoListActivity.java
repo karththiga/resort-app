@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.resortapp.model.EcoInfo;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.*;
 
 import java.util.*;
@@ -22,6 +23,10 @@ public class EcoInfoListActivity extends AppCompatActivity {
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_eco_info_list);
+
+        MaterialToolbar bar = findViewById(R.id.topAppBar);
+        setSupportActionBar(bar);
+        bar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         // find views
         rvInitiatives = findViewById(R.id.rvInitiatives);
