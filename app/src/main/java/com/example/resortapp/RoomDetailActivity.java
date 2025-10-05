@@ -1,13 +1,14 @@
 package com.example.resortapp;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.resortapp.model.Room;
-import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
@@ -30,9 +31,11 @@ public class RoomDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_detail);
 
-        MaterialToolbar bar = new MaterialToolbar(this);
-        // If you have a toolbar in layout, do: MaterialToolbar bar = findViewById(R.id.topAppBar);
-        // setSupportActionBar(bar); bar.setNavigationOnClickListener(v -> onBackPressed());
+        MaterialToolbar bar = findViewById(R.id.topAppBar);
+        if (bar != null) {
+            setSupportActionBar(bar);
+            bar.setNavigationOnClickListener(v -> onBackPressed());
+        }
 
         img = findViewById(R.id.img);
         tvName = findViewById(R.id.tvName);
@@ -66,13 +69,36 @@ public class RoomDetailActivity extends AppCompatActivity {
     }
 
     private void bindRoom() {
-        tvName.setText(room.getName() != null ? room.getName() : room.getType());
+        String displayName = room.getName();
+        if (displayName == null || displayName.trim().isEmpty()) {
+            displayName = room.getType();
+        }
+        tvName.setText(displayName);
+
         double price = room.getBasePrice() == null ? 0.0 : room.getBasePrice();
-        tvPrice.setText("LKR " + price);
-        tvDesc.setText(room.getDescription());
-//        tvMeta.setText(
-//                room.getCapacity());
-        Glide.with(this).load(room.getImageUrl()).into(img);
+        tvPrice.setText(String.format(Locale.getDefault(), "LKR %,.0f / night", price));
+
+        StringBuilder metaBuilder = new StringBuilder();
+        if (room.getType() != null && !room.getType().trim().isEmpty()) {
+            metaBuilder.append(room.getType().trim());
+        }
+        if (room.getCapacity() != null && room.getCapacity() > 0) {
+            if (metaBuilder.length() > 0) metaBuilder.append(" • ");
+            metaBuilder.append("Sleeps ").append(room.getCapacity());
+        }
+        if (metaBuilder.length() > 0) {
+            tvMeta.setText(metaBuilder.toString());
+            tvMeta.setVisibility(View.VISIBLE);
+        } else {
+            tvMeta.setVisibility(View.GONE);
+        }
+
+        String description = room.getDescription();
+        tvDesc.setText(description != null && !description.trim().isEmpty()
+                ? description
+                : getString(R.string.room_detail_no_description));
+
+        Glide.with(this).load(room.getImageUrl()).placeholder(R.drawable.placeholder_room).into(img);
     }
 
     private void pickDates() {
@@ -107,7 +133,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         double total = nights * price;
 
         Map<String, Object> b = new HashMap<>();
-        b.put("kind", "ROOM"); // <<< ADD THIS
+        b.put("kind", "ROOM");
         b.put("userId", uid);
         b.put("roomId", room.getId());
         b.put("roomName", room.getName() != null ? room.getName() : room.getType());
