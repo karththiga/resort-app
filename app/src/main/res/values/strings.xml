@@ -30,6 +30,10 @@
     <string name="open">Open</string>
     <string name="learn_more">Learn more</string>
 
+    <string name="logout_title">Log out</string>
+    <string name="logout_message">Are you sure you want to log out?</string>
+    <string name="logout_positive">Log out</string>
+
     <string name="greeting_guest">Hello, Guest</string>
     <string name="hero_tagline">EcoStay Retreat · Mountain escape</string>
     <string name="quick_actions">Quick actions</string>

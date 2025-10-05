@@ -1,8 +1,6 @@
 package com.example.resortapp;
 
 
-import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.*; import android.widget.*;
 import androidx.annotation.*; import androidx.fragment.app.Fragment;
@@ -17,6 +15,9 @@ import com.google.firebase.firestore.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.example.resortapp.util.AuthUtils;
 
 public class ProfileFragment extends Fragment {
 
@@ -80,20 +81,12 @@ public class ProfileFragment extends Fragment {
     }
 
     private void confirmAndLogout() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Log out")
-                .setMessage("Are you sure you want to log out?")
-                .setPositiveButton("Log out", (d, which) -> {
-                    FirebaseAuth.getInstance().signOut();
-
-                    // If you also had Google Sign-In, you would signOut() there too.
-
-                    // Go to Login and clear back stack so user can't return with Back
-                    Intent i = new Intent(requireContext(), LoginActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(i);
-                })
-                .setNegativeButton("Cancel", null)
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.logout_title)
+                .setMessage(R.string.logout_message)
+                .setPositiveButton(R.string.logout_positive, (d, which) ->
+                        AuthUtils.signOut(requireActivity()))
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
