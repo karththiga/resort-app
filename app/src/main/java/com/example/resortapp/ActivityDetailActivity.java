@@ -1,21 +1,22 @@
 package com.example.resortapp;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ActivityDetailActivity extends AppCompatActivity {
 
-    private ImageView img; private TextView tvName, tvPrice, tvDesc, tvDate;
+    private ImageView img; private TextView tvName, tvPrice, tvMeta, tvDesc, tvDate;
     private Button btnPickDate, btnReserve; private EditText etParticipants;
 
     private DocumentSnapshot activityDoc;
@@ -26,9 +27,16 @@ public class ActivityDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        MaterialToolbar bar = findViewById(R.id.topAppBar);
+        if (bar != null) {
+            setSupportActionBar(bar);
+            bar.setNavigationOnClickListener(v -> onBackPressed());
+        }
+
         img = findViewById(R.id.img);
         tvName = findViewById(R.id.tvName);
         tvPrice = findViewById(R.id.tvPrice);
+        tvMeta = findViewById(R.id.tvMeta);
         tvDesc = findViewById(R.id.tvDesc);
         tvDate = findViewById(R.id.tvDate);
         btnPickDate = findViewById(R.id.btnPickDate);
@@ -45,12 +53,21 @@ public class ActivityDetailActivity extends AppCompatActivity {
                     String name = doc.getString("name");
                     Double price = doc.getDouble("pricePerPerson");
                     String desc = doc.getString("description");
+                    Long capacity = doc.getLong("capacityPerSession");
                     String imageUrl = doc.getString("imageUrl");
 
                     tvName.setText(name);
-                    tvPrice.setText(String.format("LKR %.0f / person", price == null ? 0.0 : price));
-                    tvDesc.setText(desc != null ? desc : "");
-                    Glide.with(this).load(imageUrl).into(img);
+                    tvPrice.setText(String.format(Locale.getDefault(), "LKR %,.0f / person", price == null ? 0.0 : price));
+                    if (capacity != null && capacity > 0) {
+                        tvMeta.setText(getString(R.string.activity_detail_capacity_format, capacity));
+                        tvMeta.setVisibility(View.VISIBLE);
+                    } else {
+                        tvMeta.setVisibility(View.GONE);
+                    }
+                    tvDesc.setText(desc != null && !desc.trim().isEmpty()
+                            ? desc
+                            : getString(R.string.activity_detail_no_description));
+                    Glide.with(this).load(imageUrl).placeholder(R.drawable.placeholder_room).into(img);
                 })
                 .addOnFailureListener(e -> { Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show(); finish(); });
 
