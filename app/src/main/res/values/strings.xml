@@ -24,6 +24,12 @@
     <string name="offers">Offers &amp; Tips</string>
     <string name="offers_desc">Deals &amp; eco advice</string>
 
+    <string name="inbox_title">Inbox</string>
+    <string name="inbox_intro">Catch up on personalised promotions and resort updates.</string>
+    <string name="inbox_promos_title">Promos</string>
+    <string name="inbox_notifications_title">Notifications</string>
+    <string name="inbox_section_empty">You're all caught up for now.</string>
+
     <string name="green_title">Green Initiatives</string>
     <string name="green_desc">Solar power, zero-waste, local reserves</string>
 

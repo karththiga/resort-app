@@ -77,7 +77,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void switchFragment(int itemId) {
         Fragment f;
         if (itemId == R.id.nav_bookings)      f = new BookingsFragment();
-        else if (itemId == R.id.nav_promo)    f = new PromoFragment();
+        else if (itemId == R.id.nav_inbox)    f = new InboxFragment();
         else if (itemId == R.id.nav_profile)  f = new ProfileFragment();
         else                                  f = new HomeFragment();
 
