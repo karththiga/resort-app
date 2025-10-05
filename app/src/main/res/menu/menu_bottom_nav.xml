@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/nav_home"     android:title="Home"     android:icon="@drawable/baseline_home_24"/>
     <item android:id="@+id/nav_bookings" android:title="Bookings" android:icon="@drawable/baseline_book_24"/>
-    <item android:id="@+id/nav_promo"    android:title="Promo"    android:icon="@drawable/baseline_local_offer_24"/>
+    <item android:id="@+id/nav_inbox"    android:title="Inbox"    android:icon="@drawable/baseline_local_offer_24"/>
     <item android:id="@+id/nav_profile"  android:title="Profile"  android:icon="@drawable/baseline_manage_accounts_24"/>
 </menu>
