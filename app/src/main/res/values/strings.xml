@@ -44,6 +44,9 @@
     <string name="cd_hero_resort">Hero image of EcoStay Retreat</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="room_detail_no_description">Details coming soon.</string>
 
+    <string name="activity_detail_no_description">More information will be available soon.</string>
+    <string name="activity_detail_capacity_format">Up to %1$d guests per session</string>
 
 </resources>
