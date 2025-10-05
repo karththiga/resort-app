@@ -1,6 +1,7 @@
 package com.example.resortapp;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +16,7 @@ import java.util.*;
 
 public class ActivityDetailActivity extends AppCompatActivity {
 
-    private ImageView img; private TextView tvName, tvPrice, tvDesc, tvDate;
+    private ImageView img; private TextView tvName, tvPrice, tvMeta, tvDesc, tvDate;
     private Button btnPickDate, btnReserve; private EditText etParticipants;
 
     private DocumentSnapshot activityDoc;
@@ -35,6 +36,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
         img = findViewById(R.id.img);
         tvName = findViewById(R.id.tvName);
         tvPrice = findViewById(R.id.tvPrice);
+        tvMeta = findViewById(R.id.tvMeta);
         tvDesc = findViewById(R.id.tvDesc);
         tvDate = findViewById(R.id.tvDate);
         btnPickDate = findViewById(R.id.btnPickDate);
@@ -51,6 +53,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
                     String name = doc.getString("name");
                     Double price = doc.getDouble("pricePerPerson");
                     String desc = doc.getString("description");
+                    Long capacity = doc.getLong("capacityPerSession");
                     String imageUrl = doc.getString("imageUrl");
 
                     tvName.setText(name);
