@@ -58,12 +58,6 @@ public class ActivityDetailActivity extends AppCompatActivity {
 
                     tvName.setText(name);
                     tvPrice.setText(String.format(Locale.getDefault(), "LKR %,.0f / person", price == null ? 0.0 : price));
-                    if (capacity != null && capacity > 0) {
-                        tvMeta.setText(getString(R.string.activity_detail_capacity_format, capacity));
-                        tvMeta.setVisibility(View.VISIBLE);
-                    } else {
-                        tvMeta.setVisibility(View.GONE);
-                    }
                     tvDesc.setText(desc != null && !desc.trim().isEmpty()
                             ? desc
                             : getString(R.string.activity_detail_no_description));
