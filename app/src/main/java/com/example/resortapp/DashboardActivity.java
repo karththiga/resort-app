@@ -58,6 +58,7 @@ public class DashboardActivity extends AppCompatActivity {
 //        helper.seedRoomsIfNeeded();
 //        helper.seedActivitiesIfNeeded();
 //        helper.seedEcoInfoIfNeeded();
+//        helper.seedPromosIfNeeded();
 
 
         bottomNav.setOnItemSelectedListener(item -> {
