@@ -18,6 +18,10 @@
     <string name="adventures">Adventures</string>
     <string name="adventures_desc">Guided hikes, eco-tours</string>
 
+    <string name="activities_title">Activities &amp; Experiences</string>
+    <string name="activities_subtitle">Discover guided adventures, wellness sessions, and eco-friendly experiences tailored for your stay.</string>
+    <string name="activities_tap_hint">Tap to view details</string>
+
     <string name="bookings">My Bookings</string>
     <string name="bookings_desc">Rooms &amp; activities</string>
 
