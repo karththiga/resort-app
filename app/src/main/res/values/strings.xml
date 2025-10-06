@@ -25,6 +25,12 @@
     <string name="bookings">My Bookings</string>
     <string name="bookings_desc">Rooms &amp; activities</string>
 
+    <string name="eco_list_title">Eco Highlights</string>
+    <string name="eco_list_subtitle">Explore how we nurture the island&#39;s biodiversity and champion sustainable travel.</string>
+    <string name="eco_list_section_initiatives">Green initiatives</string>
+    <string name="eco_list_section_reserves">Local nature reserves</string>
+    <string name="eco_list_section_practices">Sustainability practices</string>
+
     <string name="offers">Offers &amp; Tips</string>
     <string name="offers_desc">Deals &amp; eco advice</string>
 
