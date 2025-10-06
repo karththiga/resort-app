@@ -29,6 +29,17 @@
     <string name="inbox_promos_title">Promos</string>
     <string name="inbox_notifications_title">Notifications</string>
     <string name="inbox_section_empty">You're all caught up for now.</string>
+    <string name="promo_expires">Expires %1$s</string>
+    <string name="inbox_status_update">Booking update</string>
+    <string name="inbox_reference">Reference %1$s</string>
+    <string name="inbox_activity_default_title">Activity booking</string>
+    <string name="inbox_activity_message_intro">Your reservation for %1$s is confirmed.</string>
+    <string name="inbox_activity_message_generic">Your activity reservation is confirmed.</string>
+    <string name="inbox_activity_when">Scheduled for %1$s.</string>
+    <string name="inbox_room_default_title">Room booking</string>
+    <string name="inbox_room_message_intro">Your stay in %1$s is confirmed.</string>
+    <string name="inbox_room_message_generic">Your stay is confirmed.</string>
+    <string name="inbox_room_dates">Check-in %1$s · Check-out %2$s.</string>
 
     <string name="green_title">Green Initiatives</string>
     <string name="green_desc">Solar power, zero-waste, local reserves</string>
