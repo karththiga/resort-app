@@ -14,6 +14,7 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.Timestamp;
@@ -152,6 +153,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         TextView tvBaseAmount = dialogView.findViewById(R.id.tvBaseAmount);
         TextView tvDiscountAmount = dialogView.findViewById(R.id.tvDiscountAmount);
         TextView tvTotalDue = dialogView.findViewById(R.id.tvTotalDue);
+        TextView tvGreenContribution = dialogView.findViewById(R.id.tvGreenContribution);
         TextInputLayout tilCardName = dialogView.findViewById(R.id.tilCardName);
         TextInputLayout tilCardNumber = dialogView.findViewById(R.id.tilCardNumber);
         TextInputLayout tilExpiry = dialogView.findViewById(R.id.tilExpiry);
@@ -165,13 +167,15 @@ public class RoomDetailActivity extends AppCompatActivity {
         MaterialButton btnApplyPromo = dialogView.findViewById(R.id.btnApplyPromo);
         MaterialButton btnConfirm = dialogView.findViewById(R.id.btnConfirm);
         View btnClose = dialogView.findViewById(R.id.btnClose);
+        SwitchMaterial switchGreenStay = dialogView.findViewById(R.id.switchGreenStay);
 
         if (paymentGroup == null || cardDetailsGroup == null || tvSummary == null ||
                 tvBaseAmount == null || tvDiscountAmount == null || tvTotalDue == null ||
+                tvGreenContribution == null ||
                 tilCardName == null || tilCardNumber == null || tilExpiry == null || tilCvv == null ||
                 etCardName == null || etCardNumber == null || etExpiry == null || etCvv == null ||
                 tilPromoCode == null || etPromoCode == null || btnApplyPromo == null ||
-                btnConfirm == null || btnClose == null) {
+                btnConfirm == null || btnClose == null || switchGreenStay == null) {
             return;
         }
 
@@ -185,14 +189,24 @@ public class RoomDetailActivity extends AppCompatActivity {
         final double discountRate = 0.10;
         final boolean[] promoApplied = {false};
         final double[] amountDue = {baseTotal};
+        final boolean[] contributeGreen = {false};
+        final double greenContributionAmount = 500.0;
 
         Runnable updateAmounts = () -> {
             double discount = promoApplied[0] ? baseTotal * discountRate : 0.0;
-            amountDue[0] = Math.max(0.0, baseTotal - discount);
+            double greenContribution = contributeGreen[0] ? greenContributionAmount : 0.0;
+            amountDue[0] = Math.max(0.0, baseTotal - discount) + greenContribution;
             tvBaseAmount.setText(String.format(Locale.getDefault(),
                     getString(R.string.payment_dialog_base_amount), baseTotal));
             tvDiscountAmount.setText(String.format(Locale.getDefault(),
                     getString(R.string.payment_dialog_discount_amount), discount));
+            if (greenContribution > 0) {
+                tvGreenContribution.setVisibility(View.VISIBLE);
+                tvGreenContribution.setText(String.format(Locale.getDefault(),
+                        getString(R.string.payment_dialog_green_amount), greenContribution));
+            } else {
+                tvGreenContribution.setVisibility(View.GONE);
+            }
             tvTotalDue.setText(String.format(Locale.getDefault(),
                     getString(R.string.payment_dialog_total_due), amountDue[0]));
         };
@@ -228,6 +242,11 @@ public class RoomDetailActivity extends AppCompatActivity {
         }
 
         btnConfirm.setEnabled(false);
+
+        switchGreenStay.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            contributeGreen[0] = isChecked;
+            updateAmounts.run();
+        });
 
         btnApplyPromo.setOnClickListener(v -> {
             String code = getTextFromField(etPromoCode);

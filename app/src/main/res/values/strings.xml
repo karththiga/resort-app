@@ -74,6 +74,7 @@
     <string name="payment_dialog_summary_format">Stay for %1$d night%2$s</string>
     <string name="payment_dialog_base_amount">Room total: LKR %1$,.0f</string>
     <string name="payment_dialog_discount_amount">Promo savings (10%%): -LKR %1$,.0f</string>
+    <string name="payment_dialog_green_amount">Green initiatives: +LKR %1$,.0f</string>
     <string name="payment_dialog_total_due">Amount due: LKR %1$,.0f</string>
     <string name="payment_dialog_promo_code_hint">Promo code</string>
     <string name="payment_dialog_apply_promo">Apply</string>
@@ -92,6 +93,10 @@
     <string name="payment_dialog_positive_card">Pay now</string>
     <string name="payment_dialog_positive_cash">Confirm booking</string>
     <string name="payment_dialog_close_content_description">Close payment options</string>
+    <string name="payment_dialog_green_title">Stay green with us</string>
+    <string name="payment_dialog_green_message">Fund local reforestation and low-impact amenities when you opt into our Green Stay program.</string>
+    <string name="payment_dialog_green_cta">Add LKR 500 to support our planet-positive projects</string>
+    <string name="payment_dialog_green_switch_content_description">Toggle green contribution</string>
     <string name="error_required">Required</string>
     <string name="error_card_name_invalid">Enter the full name printed on the card.</string>
     <string name="error_card_number_invalid">Enter a valid card number.</string>
