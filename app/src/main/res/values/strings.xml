@@ -69,16 +69,24 @@
     <string name="eco_info_detail_no_description">We&apos;ll add more eco insights soon.</string>
 
     <string name="payment_dialog_title">Complete your booking</string>
+    <string name="payment_dialog_subtitle">Choose how you'd like to secure your stay.</string>
+    <string name="payment_dialog_summary_label">Payment summary</string>
+    <string name="payment_dialog_summary_format">Stay for %1$d night%2$s&#10;Total: LKR %3$,.0f</string>
+    <string name="payment_dialog_payment_method_label">Payment method</string>
     <string name="payment_dialog_pay_at_hotel">Pay at hotel</string>
     <string name="payment_dialog_pay_with_card">Pay with card</string>
+    <string name="payment_dialog_card_details_title">Card details</string>
     <string name="payment_dialog_card_name">Name on card</string>
     <string name="payment_dialog_card_number">Card number</string>
     <string name="payment_dialog_card_expiry">Expiry (MM/YY)</string>
     <string name="payment_dialog_card_cvv">CVV</string>
     <string name="payment_dialog_positive_card">Pay now</string>
     <string name="payment_dialog_positive_cash">Confirm booking</string>
-    <string name="payment_dialog_positive_placeholder">Confirm</string>
-    <string name="payment_dialog_summary_label">Payment summary</string>
+    <string name="payment_dialog_close_content_description">Close payment options</string>
     <string name="error_required">Required</string>
+    <string name="error_card_name_invalid">Enter the full name printed on the card.</string>
+    <string name="error_card_number_invalid">Enter a valid card number.</string>
+    <string name="error_card_expiry_invalid">Enter a valid future expiry date.</string>
+    <string name="error_card_cvv_invalid">Enter the 3 or 4 digit security code.</string>
 
 </resources>
