@@ -68,4 +68,17 @@
     <string name="eco_info_detail_overview">Overview</string>
     <string name="eco_info_detail_no_description">We&apos;ll add more eco insights soon.</string>
 
+    <string name="payment_dialog_title">Complete your booking</string>
+    <string name="payment_dialog_pay_at_hotel">Pay at hotel</string>
+    <string name="payment_dialog_pay_with_card">Pay with card</string>
+    <string name="payment_dialog_card_name">Name on card</string>
+    <string name="payment_dialog_card_number">Card number</string>
+    <string name="payment_dialog_card_expiry">Expiry (MM/YY)</string>
+    <string name="payment_dialog_card_cvv">CVV</string>
+    <string name="payment_dialog_positive_card">Pay now</string>
+    <string name="payment_dialog_positive_cash">Confirm booking</string>
+    <string name="payment_dialog_positive_placeholder">Confirm</string>
+    <string name="payment_dialog_summary_label">Payment summary</string>
+    <string name="error_required">Required</string>
+
 </resources>
