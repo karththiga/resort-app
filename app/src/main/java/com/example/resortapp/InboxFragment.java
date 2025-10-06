@@ -1,5 +1,6 @@
 package com.example.resortapp;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
@@ -28,10 +29,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Arrays;
-import java.util.List;
 
 public class InboxFragment extends Fragment {
+
+    public interface InboxHost {
+        void onInboxVisibilityChanged(boolean visible);
+        void onInboxViewed();
+    }
 
     private static class InboxItem {
         final String id;
@@ -56,8 +60,27 @@ public class InboxFragment extends Fragment {
     private final Map<String, InboxItem> manualNotifications = new HashMap<>();
     private final Map<String, InboxItem> bookingNotifications = new HashMap<>();
 
+    @Nullable
+    private InboxHost inboxHost;
+
     public InboxFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof InboxHost) {
+            inboxHost = (InboxHost) context;
+        } else {
+            inboxHost = null;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        inboxHost = null;
     }
 
     @Nullable
@@ -73,6 +96,23 @@ public class InboxFragment extends Fragment {
         subscribeToNotifications();
 
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (inboxHost != null) {
+            inboxHost.onInboxVisibilityChanged(true);
+            inboxHost.onInboxViewed();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (inboxHost != null) {
+            inboxHost.onInboxVisibilityChanged(false);
+        }
     }
 
     @Override
@@ -222,6 +262,10 @@ public class InboxFragment extends Fragment {
             int padding = (int) (8 * getResources().getDisplayMetrics().density);
             emptyView.setPadding(0, padding, 0, padding);
             parent.addView(emptyView);
+        }
+
+        if (inboxHost != null && isResumed()) {
+            inboxHost.onInboxViewed();
         }
     }
 
