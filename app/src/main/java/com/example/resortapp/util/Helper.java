@@ -97,6 +97,32 @@ public class Helper {
                 .addOnFailureListener(e -> Log.e("SEED", "Activities seeding failed", e));
     }
 
+    // ---------------- Promos ----------------
+    public void seedPromosIfNeeded() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
+        CollectionReference promos = db.collection("promos");
+
+        addPromo(batch, promos, promo(
+                "Stay Longer & Save",
+                "Book three nights and enjoy a complimentary sunset kayaking session for two.",
+                addDays(new Date(), 30)));
+
+        addPromo(batch, promos, promo(
+                "Midweek Wellness Treat",
+                "Reserve a weekday stay to receive a free 30-minute spa massage upgrade.",
+                addDays(new Date(), 21)));
+
+        addPromo(batch, promos, promo(
+                "Family Adventure Bundle",
+                "Combine a riverside hut with our guided nature trail and save 15% on activities.",
+                addDays(new Date(), 45)));
+
+        batch.commit()
+                .addOnSuccessListener(unused -> Log.d("SEED", "Promos seeded"))
+                .addOnFailureListener(e -> Log.e("SEED", "Promos seeding failed", e));
+    }
+
     public Map<String, Object> room(String name, String type, String desc,
                                      int basePriceLKR, int capacity,
                                      String category, String imageUrl) {
@@ -169,6 +195,24 @@ public class Helper {
         DocumentReference doc = col.document();
         a.put("id", doc.getId()); // optional mirror
         batch.set(doc, a);
+    }
+
+    public Map<String, Object> promo(String title, String message, Date validUntil) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("title", title);
+        m.put("message", message);
+        m.put("createdAt", FieldValue.serverTimestamp());
+        if (validUntil != null) {
+            m.put("validUntil", validUntil);
+        }
+        m.put("status", "ACTIVE");
+        return m;
+    }
+
+    public void addPromo(WriteBatch batch, CollectionReference col, Map<String, Object> promo) {
+        DocumentReference doc = col.document();
+        promo.put("id", doc.getId());
+        batch.set(doc, promo);
     }
 
     public Map<String,Object> eco(String title, String subtitle, String desc, String imageUrl, String type) {
