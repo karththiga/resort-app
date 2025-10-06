@@ -71,7 +71,16 @@
     <string name="payment_dialog_title">Complete your booking</string>
     <string name="payment_dialog_subtitle">Choose how you'd like to secure your stay.</string>
     <string name="payment_dialog_summary_label">Payment summary</string>
-    <string name="payment_dialog_summary_format">Stay for %1$d night%2$s&#10;Total: LKR %3$,.0f</string>
+    <string name="payment_dialog_summary_format">Stay for %1$d night%2$s</string>
+    <string name="payment_dialog_base_amount">Room total: LKR %1$,.0f</string>
+    <string name="payment_dialog_discount_amount">Promo savings (10%%): -LKR %1$,.0f</string>
+    <string name="payment_dialog_total_due">Amount due: LKR %1$,.0f</string>
+    <string name="payment_dialog_promo_code_hint">Promo code</string>
+    <string name="payment_dialog_apply_promo">Apply</string>
+    <string name="payment_dialog_apply_promo_applied">Applied</string>
+    <string name="payment_dialog_apply_promo_success">Promo applied! 10%% off unlocked.</string>
+    <string name="payment_dialog_apply_promo_error">Enter a promo code to unlock your discount.</string>
+    <string name="payment_dialog_promo_required">Apply a promo code before completing payment.</string>
     <string name="payment_dialog_payment_method_label">Payment method</string>
     <string name="payment_dialog_pay_at_hotel">Pay at hotel</string>
     <string name="payment_dialog_pay_with_card">Pay with card</string>

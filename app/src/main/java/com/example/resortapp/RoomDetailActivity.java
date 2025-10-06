@@ -149,6 +149,9 @@ public class RoomDetailActivity extends AppCompatActivity {
         RadioGroup paymentGroup = dialogView.findViewById(R.id.paymentMethodGroup);
         View cardDetailsGroup = dialogView.findViewById(R.id.cardDetailsGroup);
         TextView tvSummary = dialogView.findViewById(R.id.tvPaymentSummary);
+        TextView tvBaseAmount = dialogView.findViewById(R.id.tvBaseAmount);
+        TextView tvDiscountAmount = dialogView.findViewById(R.id.tvDiscountAmount);
+        TextView tvTotalDue = dialogView.findViewById(R.id.tvTotalDue);
         TextInputLayout tilCardName = dialogView.findViewById(R.id.tilCardName);
         TextInputLayout tilCardNumber = dialogView.findViewById(R.id.tilCardNumber);
         TextInputLayout tilExpiry = dialogView.findViewById(R.id.tilExpiry);
@@ -157,12 +160,17 @@ public class RoomDetailActivity extends AppCompatActivity {
         TextInputEditText etCardNumber = dialogView.findViewById(R.id.etCardNumber);
         TextInputEditText etExpiry = dialogView.findViewById(R.id.etExpiry);
         TextInputEditText etCvv = dialogView.findViewById(R.id.etCvv);
+        TextInputLayout tilPromoCode = dialogView.findViewById(R.id.tilPromoCode);
+        TextInputEditText etPromoCode = dialogView.findViewById(R.id.etPromoCode);
+        MaterialButton btnApplyPromo = dialogView.findViewById(R.id.btnApplyPromo);
         MaterialButton btnConfirm = dialogView.findViewById(R.id.btnConfirm);
         View btnClose = dialogView.findViewById(R.id.btnClose);
 
         if (paymentGroup == null || cardDetailsGroup == null || tvSummary == null ||
+                tvBaseAmount == null || tvDiscountAmount == null || tvTotalDue == null ||
                 tilCardName == null || tilCardNumber == null || tilExpiry == null || tilCvv == null ||
                 etCardName == null || etCardNumber == null || etExpiry == null || etCvv == null ||
+                tilPromoCode == null || etPromoCode == null || btnApplyPromo == null ||
                 btnConfirm == null || btnClose == null) {
             return;
         }
@@ -170,9 +178,25 @@ public class RoomDetailActivity extends AppCompatActivity {
         String summaryText = String.format(Locale.getDefault(),
                 getString(R.string.payment_dialog_summary_format),
                 nights,
-                nights == 1 ? "" : "s",
-                total);
+                nights == 1 ? "" : "s");
         tvSummary.setText(summaryText);
+
+        final double baseTotal = total;
+        final double discountRate = 0.10;
+        final boolean[] promoApplied = {false};
+        final double[] amountDue = {baseTotal};
+
+        Runnable updateAmounts = () -> {
+            double discount = promoApplied[0] ? baseTotal * discountRate : 0.0;
+            amountDue[0] = Math.max(0.0, baseTotal - discount);
+            tvBaseAmount.setText(String.format(Locale.getDefault(),
+                    getString(R.string.payment_dialog_base_amount), baseTotal));
+            tvDiscountAmount.setText(String.format(Locale.getDefault(),
+                    getString(R.string.payment_dialog_discount_amount), discount));
+            tvTotalDue.setText(String.format(Locale.getDefault(),
+                    getString(R.string.payment_dialog_total_due), amountDue[0]));
+        };
+        updateAmounts.run();
 
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         dialog.setContentView(dialogView);
@@ -193,6 +217,7 @@ public class RoomDetailActivity extends AppCompatActivity {
             btnConfirm.setText(payingByCard
                     ? getString(R.string.payment_dialog_positive_card)
                     : getString(R.string.payment_dialog_positive_cash));
+            btnConfirm.setEnabled(promoApplied[0]);
         };
         paymentGroup.setOnCheckedChangeListener(listener);
 
@@ -202,7 +227,34 @@ public class RoomDetailActivity extends AppCompatActivity {
             listener.onCheckedChanged(paymentGroup, paymentGroup.getCheckedRadioButtonId());
         }
 
+        btnConfirm.setEnabled(false);
+
+        btnApplyPromo.setOnClickListener(v -> {
+            String code = getTextFromField(etPromoCode);
+            if (TextUtils.isEmpty(code)) {
+                tilPromoCode.setError(getString(R.string.payment_dialog_apply_promo_error));
+                promoApplied[0] = false;
+                updateAmounts.run();
+                btnConfirm.setEnabled(false);
+                return;
+            }
+
+            tilPromoCode.setError(null);
+            promoApplied[0] = true;
+            updateAmounts.run();
+            btnConfirm.setEnabled(true);
+            btnApplyPromo.setText(getString(R.string.payment_dialog_apply_promo_applied));
+            btnApplyPromo.setEnabled(false);
+            etPromoCode.setEnabled(false);
+            Toast.makeText(this, R.string.payment_dialog_apply_promo_success, Toast.LENGTH_SHORT).show();
+        });
+
         btnConfirm.setOnClickListener(v -> {
+            if (!promoApplied[0]) {
+                tilPromoCode.setError(getString(R.string.payment_dialog_promo_required));
+                return;
+            }
+
             int selectedId = paymentGroup.getCheckedRadioButtonId();
             boolean payingByCard = selectedId == R.id.optionPayByCard;
 
@@ -240,9 +292,9 @@ public class RoomDetailActivity extends AppCompatActivity {
                     return;
                 }
 
-                createBooking(uid, nights, pricePerNight, total, "CARD", "PAID");
+                createBooking(uid, nights, pricePerNight, amountDue[0], "CARD", "PAID");
             } else {
-                createBooking(uid, nights, pricePerNight, total, "PAY_AT_HOTEL", "PENDING");
+                createBooking(uid, nights, pricePerNight, amountDue[0], "PAY_AT_HOTEL", "PENDING");
             }
 
             dialog.dismiss();
