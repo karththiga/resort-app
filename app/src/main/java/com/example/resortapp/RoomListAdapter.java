@@ -3,7 +3,6 @@ package com.example.resortapp;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -87,9 +86,6 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
             if (onRoomClick != null) onRoomClick.onClick(r);
         };
         h.itemView.setOnClickListener(go);
-        if (h.btnView != null) {
-            h.btnView.setOnClickListener(go);
-        }
 
 
 //        h.name.setText(r.getName() != null ? r.getName() : r.getType());
@@ -108,7 +104,6 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
         ImageView img;
         TextView name, price;
         TextView desc;
-        Button btnView;
 
         VH(@NonNull View v) {
             super(v);
@@ -116,7 +111,6 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
             name = v.findViewById(R.id.tvName);
             price = v.findViewById(R.id.tvPrice);
             desc = v.findViewById(R.id.tvDesc);
-            btnView = v.findViewById(R.id.btnView);
         }
     }
 
