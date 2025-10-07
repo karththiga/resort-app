@@ -36,6 +36,8 @@
     <string name="rooms_tap_hint">Tap to view details</string>
     <string name="rooms_sold_out_label">You missed it</string>
     <string name="room_detail_no_availability">This room is fully booked for the selected dates.</string>
+    <string name="room_detail_no_availability_dialog_title">Fully booked</string>
+    <string name="room_detail_no_availability_dialog_message">This room is fully booked for your selected dates. Please select different dates or another room.</string>
 
     <plurals name="rooms_availability_count">
         <item quantity="one">%d room available</item>

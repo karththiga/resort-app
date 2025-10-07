@@ -14,6 +14,8 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -169,6 +171,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         TextInputEditText etPromoCode = dialogView.findViewById(R.id.etPromoCode);
         MaterialButton btnApplyPromo = dialogView.findViewById(R.id.btnApplyPromo);
         MaterialButton btnConfirm = dialogView.findViewById(R.id.btnConfirm);
+        CircularProgressIndicator progressBooking = dialogView.findViewById(R.id.progressBooking);
         View btnClose = dialogView.findViewById(R.id.btnClose);
         SwitchMaterial switchGreenStay = dialogView.findViewById(R.id.switchGreenStay);
 
@@ -178,7 +181,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                 tilCardName == null || tilCardNumber == null || tilExpiry == null || tilCvv == null ||
                 etCardName == null || etCardNumber == null || etExpiry == null || etCvv == null ||
                 tilPromoCode == null || etPromoCode == null || btnApplyPromo == null ||
-                btnConfirm == null || btnClose == null || switchGreenStay == null) {
+                btnConfirm == null || btnClose == null || switchGreenStay == null ||
+                progressBooking == null) {
             return;
         }
 
@@ -315,10 +319,10 @@ public class RoomDetailActivity extends AppCompatActivity {
                 }
 
                 attemptBooking(uid, nights, pricePerNight, amountDue[0],
-                        "CARD", "PAID", btnConfirm, dialog);
+                        "CARD", "PAID", btnConfirm, progressBooking, dialog);
             } else {
                 attemptBooking(uid, nights, pricePerNight, amountDue[0],
-                        "PAY_AT_HOTEL", "PENDING", btnConfirm, dialog);
+                        "PAY_AT_HOTEL", "PENDING", btnConfirm, progressBooking, dialog);
             }
         });
 
@@ -332,8 +336,11 @@ public class RoomDetailActivity extends AppCompatActivity {
                                 String paymentMethod,
                                 String paymentStatus,
                                 MaterialButton btnConfirm,
+                                CircularProgressIndicator progressBooking,
                                 BottomSheetDialog dialog) {
         btnConfirm.setEnabled(false);
+        progressBooking.setVisibility(View.VISIBLE);
+        progressBooking.setIndeterminate(true);
 
         Timestamp checkInTs = new Timestamp(new Date(startUtc));
         Timestamp checkOutTs = new Timestamp(new Date(endUtc));
@@ -382,24 +389,32 @@ public class RoomDetailActivity extends AppCompatActivity {
                     return null;
                 })
                 .addOnSuccessListener(ignored -> {
+                    progressBooking.setVisibility(View.GONE);
                     Toast.makeText(this, "Booked! See in My Bookings.", Toast.LENGTH_LONG).show();
                     dialog.dismiss();
                     finish();
                 })
                 .addOnFailureListener(e -> {
                     btnConfirm.setEnabled(true);
+                    progressBooking.setVisibility(View.GONE);
                     if (e instanceof FirebaseFirestoreException) {
                         FirebaseFirestoreException ffe = (FirebaseFirestoreException) e;
                         if (ffe.getCode() == FirebaseFirestoreException.Code.ABORTED &&
                                 "NO_AVAILABILITY".equals(ffe.getMessage())) {
-                            Toast.makeText(this,
-                                    R.string.room_detail_no_availability,
-                                    Toast.LENGTH_LONG).show();
+                            showNoAvailabilityDialog();
                             return;
                         }
                     }
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private void showNoAvailabilityDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.room_detail_no_availability_dialog_title)
+                .setMessage(R.string.room_detail_no_availability_dialog_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     private String getTextFromField(TextInputEditText editText) {
