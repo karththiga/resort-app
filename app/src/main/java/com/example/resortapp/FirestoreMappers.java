@@ -9,11 +9,7 @@ public final class FirestoreMappers {
         Room r = d.toObject(Room.class);
         if (r == null) r = new Room();
         // ensure id is populated for stableIds/DiffUtil
-        try {
-            java.lang.reflect.Field f = Room.class.getDeclaredField("id");
-            f.setAccessible(true);
-            f.set(r, d.getId());
-        } catch (Exception ignored) {}
+        r.setId(d.getId());
         return r;
     }
 }

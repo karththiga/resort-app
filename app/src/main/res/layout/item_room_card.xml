@@ -56,6 +56,23 @@
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAvailability"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/green_dark"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvTapHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/rooms_tap_hint"
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

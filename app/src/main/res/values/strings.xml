@@ -22,6 +22,26 @@
     <string name="activities_subtitle">Discover guided adventures, wellness sessions, and eco-friendly experiences tailored for your stay.</string>
     <string name="activities_tap_hint">Tap to view details</string>
 
+    <string name="rooms_filters_title">Filter rooms</string>
+    <string name="rooms_filter_room_type_label">Room type</string>
+    <string name="rooms_filter_price_label">Price</string>
+    <string name="rooms_filter_type_all">All room types</string>
+    <string name="rooms_filter_type_queen">Queens bedroom</string>
+    <string name="rooms_filter_type_king">Kings bedroom</string>
+    <string name="rooms_filter_type_family">Family bedroom</string>
+    <string name="rooms_filter_price_any">Any price</string>
+    <string name="rooms_filter_price_below_20000">Below LKR 20,000</string>
+    <string name="rooms_filter_price_between_20000_40000">LKR 20,000 - 40,000</string>
+    <string name="rooms_filter_price_above_40000">Above LKR 40,000</string>
+    <string name="rooms_tap_hint">Tap to view details</string>
+    <string name="rooms_sold_out_label">You missed it</string>
+    <string name="room_detail_no_availability">This room is fully booked for the selected dates.</string>
+
+    <plurals name="rooms_availability_count">
+        <item quantity="one">%d room available</item>
+        <item quantity="other">%d rooms available</item>
+    </plurals>
+
     <string name="bookings">My Bookings</string>
     <string name="bookings_desc">Rooms &amp; activities</string>
 
