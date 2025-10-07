@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
+
+    private static final int DEFAULT_STOCK = 5;
 
     public enum LayoutMode {
         LIST,
@@ -82,10 +85,45 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
         h.price.setText(String.format("LKR %.0f / night", price));
         Glide.with(h.img.getContext()).load(r.getImageUrl()).into(h.img);
 
+        int availableRooms = r.getAvailableRooms() != null ? r.getAvailableRooms() : DEFAULT_STOCK;
+        boolean soldOut = r.isSoldOut() || availableRooms <= 0;
+        if (soldOut) availableRooms = 0;
+
+        if (h.availability != null) {
+            if (soldOut) {
+                h.availability.setText(h.itemView.getContext().getString(R.string.rooms_sold_out_label));
+                h.availability.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.rooms_sold_out));
+            } else {
+                h.availability.setText(h.itemView.getResources().getQuantityString(
+                        R.plurals.rooms_availability_count,
+                        availableRooms,
+                        availableRooms));
+                h.availability.setTextColor(ContextCompat.getColor(h.itemView.getContext(), R.color.green_dark));
+            }
+            h.availability.setVisibility(View.VISIBLE);
+        }
+
+        if (h.tapHint != null) {
+            if (soldOut) {
+                h.tapHint.setVisibility(View.GONE);
+            } else {
+                h.tapHint.setText(R.string.rooms_tap_hint);
+                h.tapHint.setVisibility(View.VISIBLE);
+            }
+        }
+
         View.OnClickListener go = v -> {
             if (onRoomClick != null) onRoomClick.onClick(r);
         };
-        h.itemView.setOnClickListener(go);
+        if (soldOut) {
+            h.itemView.setOnClickListener(null);
+        } else {
+            h.itemView.setOnClickListener(go);
+        }
+        h.itemView.setEnabled(!soldOut);
+        h.itemView.setClickable(!soldOut);
+        h.itemView.setFocusable(!soldOut);
+        h.itemView.setAlpha(soldOut ? 0.5f : 1f);
 
 
 //        h.name.setText(r.getName() != null ? r.getName() : r.getType());
@@ -104,6 +142,8 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
         ImageView img;
         TextView name, price;
         TextView desc;
+        TextView availability;
+        TextView tapHint;
 
         VH(@NonNull View v) {
             super(v);
@@ -111,6 +151,8 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
             name = v.findViewById(R.id.tvName);
             price = v.findViewById(R.id.tvPrice);
             desc = v.findViewById(R.id.tvDesc);
+            availability = v.findViewById(R.id.tvAvailability);
+            tapHint = v.findViewById(R.id.tvTapHint);
         }
     }
 
@@ -145,7 +187,9 @@ public class RoomListAdapter extends RecyclerView.Adapter<RoomListAdapter.VH> {
                     && Objects.equals(a.getType(), b.getType())
                     && Objects.equals(a.getImageUrl(), b.getImageUrl())
                     && Objects.equals(a.getBasePrice(), b.getBasePrice())
-                    && Objects.equals(a.getStatus(), b.getStatus());
+                    && Objects.equals(a.getStatus(), b.getStatus())
+                    && Objects.equals(a.getAvailableRooms(), b.getAvailableRooms())
+                    && a.isSoldOut() == b.isSoldOut();
         }
     }
 }
