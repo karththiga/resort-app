@@ -80,18 +80,31 @@
             app:layout_goneMarginStart="12dp" />
 
         <TextView
+            android:id="@+id/tvAvailability"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/green_dark"
+            android:textSize="13sp"
+            app:layout_constraintStart_toEndOf="@id/img"
+            app:layout_constraintTop_toBottomOf="@id/tvPrice"
+            app:layout_constraintBottom_toTopOf="@id/tvTapHint"
+            app:layout_goneMarginStart="12dp" />
+
+        <TextView
             android:id="@+id/tvTapHint"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/activities_tap_hint"
+            android:text="@string/rooms_tap_hint"
             android:textColor="@color/secondaryTextColor"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/img"
-            app:layout_constraintTop_toBottomOf="@id/tvPrice"
+            app:layout_constraintTop_toBottomOf="@id/tvAvailability"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_goneMarginStart="12dp" />
 

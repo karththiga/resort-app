@@ -18,4 +18,5 @@
     <color name="surfaceVariant">#FFF5F7F9</color>
     <color name="colorPrimaryLight">#E8F5E9</color>
     <color name="dividerColor">#FFE0E0E0</color>
+    <color name="rooms_sold_out">#C62828</color>
 </resources>
