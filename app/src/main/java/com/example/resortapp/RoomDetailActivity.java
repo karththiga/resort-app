@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.resortapp.model.Room;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -21,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class RoomDetailActivity extends AppCompatActivity {
@@ -343,11 +345,21 @@ public class RoomDetailActivity extends AppCompatActivity {
                             .whereEqualTo("roomId", room.getId())
                             .whereLessThan("checkIn", checkOutTs);
 
-                    QuerySnapshot snaps = transaction.get(query);
+                    QuerySnapshot prefetch;
+                    try {
+                        prefetch = Tasks.await(query.get());
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+
                     int overlapping = 0;
-                    for (DocumentSnapshot doc : snaps.getDocuments()) {
-                        Timestamp existingCheckIn = doc.getTimestamp("checkIn");
-                        Timestamp existingCheckOut = doc.getTimestamp("checkOut");
+                    for (DocumentSnapshot doc : prefetch.getDocuments()) {
+                        DocumentSnapshot existing = transaction.get(doc.getReference());
+                        Timestamp existingCheckIn = existing.getTimestamp("checkIn");
+                        Timestamp existingCheckOut = existing.getTimestamp("checkOut");
                         if (existingCheckIn == null || existingCheckOut == null) continue;
 
                         long existingStart = existingCheckIn.toDate().getTime();
