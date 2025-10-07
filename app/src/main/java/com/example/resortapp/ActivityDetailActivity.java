@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
@@ -21,6 +22,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
 
     private ImageView img; private TextView tvName, tvPrice, tvMeta, tvDesc, tvDate;
     private Button btnPickDate, btnReserve; private EditText etParticipants;
+    private CircularProgressIndicator progressReserve;
 
     private DocumentSnapshot activityDoc;
     private Long dateUtc = null; // activity day
@@ -49,6 +51,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
         btnPickDate = findViewById(R.id.btnPickDate);
         btnReserve = findViewById(R.id.btnReserve);
         etParticipants = findViewById(R.id.etParticipants);
+        progressReserve = findViewById(R.id.progressReserve);
 
         String id = getIntent().getStringExtra("activityId");
         if (id == null) { finish(); return; }
@@ -115,8 +118,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
         Timestamp nextDay = new Timestamp(cal.getTime());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        reserveInProgress = true;
-        btnReserve.setEnabled(false);
+        setReserveInProgress(true);
 
         db.runTransaction(transaction -> {
                     Query query = db.collection("bookings")
@@ -156,13 +158,12 @@ public class ActivityDetailActivity extends AppCompatActivity {
                     return null;
                 })
                 .addOnSuccessListener(ignored -> {
-                    reserveInProgress = false;
+                    setReserveInProgress(false);
                     Toast.makeText(this, "Reserved! See in My Bookings.", Toast.LENGTH_LONG).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    reserveInProgress = false;
-                    btnReserve.setEnabled(true);
+                    setReserveInProgress(false);
                     if (e instanceof FirebaseFirestoreException) {
                         FirebaseFirestoreException ffe = (FirebaseFirestoreException) e;
                         if (ffe.getCode() == FirebaseFirestoreException.Code.ABORTED &&
@@ -173,6 +174,14 @@ public class ActivityDetailActivity extends AppCompatActivity {
                     }
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private void setReserveInProgress(boolean inProgress) {
+        reserveInProgress = inProgress;
+        btnReserve.setEnabled(!inProgress);
+        if (progressReserve != null) {
+            progressReserve.setVisibility(inProgress ? View.VISIBLE : View.GONE);
+        }
     }
 
     private Map<String, Object> buildActivityBookingPayload(String uid,

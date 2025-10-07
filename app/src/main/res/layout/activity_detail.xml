@@ -194,6 +194,17 @@
                         android:layout_marginTop="24dp"
                         android:text="Reserve activity"
                         app:cornerRadius="12dp" />
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/progressReserve"
+                        style="@style/Widget.MaterialComponents.CircularProgressIndicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="16dp"
+                        android:visibility="gone"
+                        app:indicatorSize="48dp"
+                        app:trackThickness="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
