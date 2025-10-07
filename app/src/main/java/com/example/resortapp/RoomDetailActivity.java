@@ -238,7 +238,6 @@ public class RoomDetailActivity extends AppCompatActivity {
             btnConfirm.setText(payingByCard
                     ? getString(R.string.payment_dialog_positive_card)
                     : getString(R.string.payment_dialog_positive_cash));
-            btnConfirm.setEnabled(promoApplied[0]);
         };
         paymentGroup.setOnCheckedChangeListener(listener);
 
@@ -247,8 +246,6 @@ public class RoomDetailActivity extends AppCompatActivity {
         } else {
             listener.onCheckedChanged(paymentGroup, paymentGroup.getCheckedRadioButtonId());
         }
-
-        btnConfirm.setEnabled(false);
 
         switchGreenStay.setOnCheckedChangeListener((buttonView, isChecked) -> {
             contributeGreen[0] = isChecked;
@@ -259,16 +256,12 @@ public class RoomDetailActivity extends AppCompatActivity {
             String code = getTextFromField(etPromoCode);
             if (TextUtils.isEmpty(code)) {
                 tilPromoCode.setError(getString(R.string.payment_dialog_apply_promo_error));
-                promoApplied[0] = false;
-                updateAmounts.run();
-                btnConfirm.setEnabled(false);
                 return;
             }
 
             tilPromoCode.setError(null);
             promoApplied[0] = true;
             updateAmounts.run();
-            btnConfirm.setEnabled(true);
             btnApplyPromo.setText(getString(R.string.payment_dialog_apply_promo_applied));
             btnApplyPromo.setEnabled(false);
             etPromoCode.setEnabled(false);
@@ -276,11 +269,6 @@ public class RoomDetailActivity extends AppCompatActivity {
         });
 
         btnConfirm.setOnClickListener(v -> {
-            if (!promoApplied[0]) {
-                tilPromoCode.setError(getString(R.string.payment_dialog_promo_required));
-                return;
-            }
-
             int selectedId = paymentGroup.getCheckedRadioButtonId();
             boolean payingByCard = selectedId == R.id.optionPayByCard;
 

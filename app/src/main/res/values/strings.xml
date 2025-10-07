@@ -113,7 +113,6 @@
     <string name="payment_dialog_apply_promo_applied">Applied</string>
     <string name="payment_dialog_apply_promo_success">Promo applied! 10%% off unlocked.</string>
     <string name="payment_dialog_apply_promo_error">Enter a promo code to unlock your discount.</string>
-    <string name="payment_dialog_promo_required">Apply a promo code before completing payment.</string>
     <string name="payment_dialog_payment_method_label">Payment method</string>
     <string name="payment_dialog_pay_at_hotel">Pay at hotel</string>
     <string name="payment_dialog_pay_with_card">Pay with card</string>
