@@ -96,6 +96,9 @@
     <string name="room_detail_no_description">Details coming soon.</string>
 
     <string name="activity_detail_no_description">More information will be available soon.</string>
+    <string name="activity_detail_meta_capacity_format">Up to %1$d guests per session</string>
+    <string name="activity_detail_no_availability_dialog_title">Fully booked</string>
+    <string name="activity_detail_no_availability_dialog_message">This activity is fully booked for your selected date. Please select a different day.</string>
 
     <string name="eco_info_detail_overview">Overview</string>
     <string name="eco_info_detail_no_description">We&apos;ll add more eco insights soon.</string>
