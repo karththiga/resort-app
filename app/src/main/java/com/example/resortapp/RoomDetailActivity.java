@@ -6,7 +6,6 @@ import android.view.View;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AlertDialog;
 import com.bumptech.glide.Glide;
 import com.example.resortapp.model.Room;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -32,6 +31,8 @@ public class RoomDetailActivity extends AppCompatActivity {
 
     private Room room;
     private Long startUtc = null, endUtc = null; // UTC millis
+
+    private static final int DEFAULT_ROOM_STOCK = 5;
 
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
@@ -311,15 +312,65 @@ public class RoomDetailActivity extends AppCompatActivity {
                     return;
                 }
 
-                createBooking(uid, nights, pricePerNight, amountDue[0], "CARD", "PAID");
+                attemptBooking(uid, nights, pricePerNight, amountDue[0],
+                        "CARD", "PAID", btnConfirm, dialog);
             } else {
-                createBooking(uid, nights, pricePerNight, amountDue[0], "PAY_AT_HOTEL", "PENDING");
+                attemptBooking(uid, nights, pricePerNight, amountDue[0],
+                        "PAY_AT_HOTEL", "PENDING", btnConfirm, dialog);
             }
-
-            dialog.dismiss();
         });
 
         dialog.show();
+    }
+
+    private void attemptBooking(String uid,
+                                long nights,
+                                double pricePerNight,
+                                double total,
+                                String paymentMethod,
+                                String paymentStatus,
+                                MaterialButton btnConfirm,
+                                BottomSheetDialog dialog) {
+        btnConfirm.setEnabled(false);
+
+        Timestamp checkInTs = new Timestamp(new Date(startUtc));
+        Timestamp checkOutTs = new Timestamp(new Date(endUtc));
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("bookings")
+                .whereEqualTo("status", "CONFIRMED")
+                .whereEqualTo("roomId", room.getId())
+                .whereLessThan("checkIn", checkOutTs)
+                .get()
+                .addOnSuccessListener(snaps -> {
+                    int overlapping = 0;
+                    for (DocumentSnapshot doc : snaps.getDocuments()) {
+                        Timestamp existingCheckIn = doc.getTimestamp("checkIn");
+                        Timestamp existingCheckOut = doc.getTimestamp("checkOut");
+                        if (existingCheckIn == null || existingCheckOut == null) continue;
+
+                        long existingStart = existingCheckIn.toDate().getTime();
+                        long existingEnd = existingCheckOut.toDate().getTime();
+                        if (existingStart < endUtc && existingEnd > startUtc) {
+                            overlapping++;
+                        }
+                    }
+
+                    if (overlapping >= DEFAULT_ROOM_STOCK) {
+                        btnConfirm.setEnabled(true);
+                        Toast.makeText(this,
+                                R.string.room_detail_no_availability,
+                                Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    createBooking(uid, nights, pricePerNight, total, paymentMethod, paymentStatus,
+                            checkInTs, checkOutTs, btnConfirm, dialog);
+                })
+                .addOnFailureListener(e -> {
+                    btnConfirm.setEnabled(true);
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 
     private String getTextFromField(TextInputEditText editText) {
@@ -418,8 +469,16 @@ public class RoomDetailActivity extends AppCompatActivity {
         return digitsOnly.matches("\\d{3,4}");
     }
 
-    private void createBooking(String uid, long nights, double pricePerNight, double total,
-                               String paymentMethod, String paymentStatus) {
+    private void createBooking(String uid,
+                               long nights,
+                               double pricePerNight,
+                               double total,
+                               String paymentMethod,
+                               String paymentStatus,
+                               Timestamp checkInTs,
+                               Timestamp checkOutTs,
+                               MaterialButton btnConfirm,
+                               BottomSheetDialog dialog) {
         Map<String, Object> b = new HashMap<>();
         b.put("kind", "ROOM");
         b.put("userId", uid);
@@ -427,8 +486,8 @@ public class RoomDetailActivity extends AppCompatActivity {
         b.put("roomName", room.getName() != null ? room.getName() : room.getType());
         b.put("roomImageUrl", room.getImageUrl());
         b.put("priceAtBooking", pricePerNight);
-        b.put("checkIn", new Timestamp(new Date(startUtc)));
-        b.put("checkOut", new Timestamp(new Date(endUtc)));
+        b.put("checkIn", checkInTs);
+        b.put("checkOut", checkOutTs);
         b.put("nights", nights);
         b.put("totalAmount", total);
         b.put("status", "CONFIRMED");
@@ -439,9 +498,12 @@ public class RoomDetailActivity extends AppCompatActivity {
         FirebaseFirestore.getInstance().collection("bookings").add(b)
                 .addOnSuccessListener(ref -> {
                     Toast.makeText(this, "Booked! See in My Bookings.", Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
                     finish();
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
+                .addOnFailureListener(e -> {
+                    btnConfirm.setEnabled(true);
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                });
     }
 }
