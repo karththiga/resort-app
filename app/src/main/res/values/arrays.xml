@@ -23,4 +23,18 @@
         <item>single</item>
         <item>party</item>
     </string-array>
+
+    <string-array name="rooms_filter_type_options">
+        <item>@string/rooms_filter_type_all</item>
+        <item>@string/rooms_filter_type_queen</item>
+        <item>@string/rooms_filter_type_king</item>
+        <item>@string/rooms_filter_type_family</item>
+    </string-array>
+
+    <string-array name="rooms_filter_price_options">
+        <item>@string/rooms_filter_price_any</item>
+        <item>@string/rooms_filter_price_below_20000</item>
+        <item>@string/rooms_filter_price_between_20000_40000</item>
+        <item>@string/rooms_filter_price_above_40000</item>
+    </string-array>
 </resources>

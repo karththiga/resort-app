@@ -23,6 +23,73 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvFiltersTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/rooms_filters_title"
+                android:textColor="@color/dashboard_title"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rooms_filter_room_type_label"
+                    android:textColor="@color/secondaryTextColor"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/spRoomTypeFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rooms_filter_price_label"
+                    android:textColor="@color/secondaryTextColor"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/spPriceFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAllRooms"
         android:layout_width="match_parent"
