@@ -3,6 +3,10 @@ package com.example.resortapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,8 +28,13 @@ public class RoomsListActivity extends AppCompatActivity {
     private ListenerRegistration bookingsReg;
     private ListenerRegistration userReg;
     private List<Room> latestRooms = new ArrayList<>();
-    private Set<String> unavailableRoomIds = new HashSet<>();
+    private final Map<String, Integer> bookingsCountByRoomId = new HashMap<>();
+    private final Map<String, RoomKind> roomKindsById = new HashMap<>();
     private Long travelStartUtc, travelEndUtc;
+    private RoomKind selectedTypeFilter = null;
+    private PriceFilter selectedPriceFilter = PriceFilter.ANY;
+
+    private static final int DEFAULT_ROOM_STOCK = 5;
 
     @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +47,54 @@ public class RoomsListActivity extends AppCompatActivity {
         String category = getIntent().getStringExtra("category");
         TextView title = findViewById(R.id.tvTitle);
         title.setText(human(category) + " — All Rooms");
+
+        Spinner typeFilterView = findViewById(R.id.spRoomTypeFilter);
+        Spinner priceFilterView = findViewById(R.id.spPriceFilter);
+
+        if (typeFilterView != null) {
+            ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter.createFromResource(
+                    this,
+                    R.array.rooms_filter_type_options,
+                    android.R.layout.simple_spinner_item);
+            typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            typeFilterView.setAdapter(typeAdapter);
+            typeFilterView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position <= 0) {
+                        selectedTypeFilter = null;
+                    } else {
+                        int idx = position - 1;
+                        if (idx >= 0 && idx < RoomKind.values().length) {
+                            selectedTypeFilter = RoomKind.values()[idx];
+                        } else {
+                            selectedTypeFilter = null;
+                        }
+                    }
+                    updateRoomsAdapter();
+                }
+                @Override public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
+
+        if (priceFilterView != null) {
+            ArrayAdapter<CharSequence> priceAdapter = ArrayAdapter.createFromResource(
+                    this,
+                    R.array.rooms_filter_price_options,
+                    android.R.layout.simple_spinner_item);
+            priceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            priceFilterView.setAdapter(priceAdapter);
+            priceFilterView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position >= 0 && position < PriceFilter.values().length) {
+                        selectedPriceFilter = PriceFilter.values()[position];
+                    } else {
+                        selectedPriceFilter = PriceFilter.ANY;
+                    }
+                    updateRoomsAdapter();
+                }
+                @Override public void onNothingSelected(AdapterView<?> parent) {}
+            });
+        }
 
         RecyclerView rv = findViewById(R.id.rvAllRooms);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -52,7 +109,20 @@ public class RoomsListActivity extends AppCompatActivity {
         roomsReg = q.addSnapshotListener(this, (qs, e) -> {
             if (e != null || qs == null) return;
             List<Room> list = new ArrayList<>();
-            for (DocumentSnapshot d : qs.getDocuments()) list.add(FirestoreMappers.toRoom(d));
+            Map<String, RoomKind> kinds = new HashMap<>();
+            for (DocumentSnapshot d : qs.getDocuments()) {
+                Room room = FirestoreMappers.toRoom(d);
+                RoomKind kind = RoomKind.fromRaw(room.getType());
+                if (kind == null) {
+                    kind = RoomKind.fromRaw(room.getName());
+                }
+                if (kind != null) {
+                    kinds.put(room.getId(), kind);
+                    list.add(room);
+                }
+            }
+            roomKindsById.clear();
+            roomKindsById.putAll(kinds);
             latestRooms = list;
             updateRoomsAdapter();
         });
@@ -88,7 +158,7 @@ public class RoomsListActivity extends AppCompatActivity {
     private void subscribeBookings() {
         if (bookingsReg != null) { bookingsReg.remove(); bookingsReg = null; }
         if (travelStartUtc == null || travelEndUtc == null) {
-            unavailableRoomIds.clear();
+            bookingsCountByRoomId.clear();
             updateRoomsAdapter();
             return;
         }
@@ -99,7 +169,7 @@ public class RoomsListActivity extends AppCompatActivity {
 
         bookingsReg = q.addSnapshotListener(this, (qs, e) -> {
             if (e != null || qs == null) return;
-            Set<String> busy = new HashSet<>();
+            Map<String, Integer> busyCounts = new HashMap<>();
             for (DocumentSnapshot d : qs.getDocuments()) {
                 String kind = d.getString("kind");
                 if (kind != null && !"ROOM".equals(kind)) continue;
@@ -110,10 +180,11 @@ public class RoomsListActivity extends AppCompatActivity {
                 long ci = checkIn.toDate().getTime();
                 long co = checkOut.toDate().getTime();
                 if (ci < travelEndUtc && co > travelStartUtc) {
-                    busy.add(roomId);
+                    busyCounts.merge(roomId, 1, Integer::sum);
                 }
             }
-            unavailableRoomIds = busy;
+            bookingsCountByRoomId.clear();
+            bookingsCountByRoomId.putAll(busyCounts);
             updateRoomsAdapter();
         });
     }
@@ -121,11 +192,25 @@ public class RoomsListActivity extends AppCompatActivity {
     private void updateRoomsAdapter() {
         if (latestRooms == null) return;
         List<Room> filtered = new ArrayList<>();
-        for (Room r : latestRooms) {
-            if (travelStartUtc != null && travelEndUtc != null && unavailableRoomIds.contains(r.getId())) {
-                continue;
+        for (Room room : latestRooms) {
+            RoomKind kind = roomKindsById.get(room.getId());
+            if (kind == null) continue;
+            if (selectedTypeFilter != null && kind != selectedTypeFilter) continue;
+            if (!selectedPriceFilter.matches(room.getBasePrice())) continue;
+
+            Room display = room.copy();
+            String displayName = kind.getDisplayName(this);
+            if (display.getName() == null || display.getName().trim().isEmpty()) {
+                display.setName(displayName);
             }
-            filtered.add(r);
+            display.setType(displayName);
+
+            int booked = bookingsCountByRoomId.getOrDefault(room.getId(), 0);
+            int available = DEFAULT_ROOM_STOCK - booked;
+            if (available < 0) available = 0;
+            display.setAvailableRooms(available);
+            display.setSoldOut(available <= 0);
+            filtered.add(display);
         }
         adapter.submit(filtered);
     }
@@ -135,5 +220,70 @@ public class RoomsListActivity extends AppCompatActivity {
         if ("mountain_cabin".equals(code)) return "Mountain‑view cabins";
         if ("river_hut".equals(code)) return "River side hut";
         return "Rooms";
+    }
+
+    private enum RoomKind {
+        QUEEN("queen", R.string.rooms_filter_type_queen),
+        KING("king", R.string.rooms_filter_type_king),
+        FAMILY("family", R.string.rooms_filter_type_family);
+
+        private final String keyword;
+        private final int displayNameRes;
+
+        RoomKind(String keyword, int displayNameRes) {
+            this.keyword = keyword;
+            this.displayNameRes = displayNameRes;
+        }
+
+        public String getDisplayName(RoomsListActivity activity) {
+            return activity.getString(displayNameRes);
+        }
+
+        static RoomKind fromRaw(String raw) {
+            if (raw == null) return null;
+            String normalized = raw.trim().toLowerCase(Locale.ROOT);
+            String sanitized = normalized.replaceAll("[^a-z]+", " ").trim();
+            String[] tokens = sanitized.isEmpty() ? new String[0] : sanitized.split("\\s+");
+            for (RoomKind kind : values()) {
+                if (matches(tokens, kind.keyword)) {
+                    return kind;
+                }
+            }
+            return null;
+        }
+
+        private static boolean matches(String[] tokens, String keyword) {
+            for (String token : tokens) {
+                if (token == null || token.isEmpty()) continue;
+                if (token.equals(keyword) || token.equals(keyword + "s")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private enum PriceFilter {
+        ANY {
+            @Override boolean matches(Double price) { return true; }
+        },
+        BELOW_20000 {
+            @Override boolean matches(Double price) { return toValue(price) < 20000.0; }
+        },
+        BETWEEN_20000_40000 {
+            @Override boolean matches(Double price) {
+                double value = toValue(price);
+                return value >= 20000.0 && value <= 40000.0;
+            }
+        },
+        ABOVE_40000 {
+            @Override boolean matches(Double price) { return toValue(price) > 40000.0; }
+        };
+
+        abstract boolean matches(Double price);
+
+        static double toValue(Double price) {
+            return price == null ? 0.0 : price;
+        }
     }
 }

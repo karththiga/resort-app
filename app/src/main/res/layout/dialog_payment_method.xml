@@ -380,5 +380,14 @@
             android:text="@string/payment_dialog_positive_cash"
             app:iconGravity="textStart"
             app:iconPadding="12dp" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressBooking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:indicatorSize="36dp" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
