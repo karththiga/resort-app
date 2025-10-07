@@ -22,46 +22,46 @@ public class Helper {
         CollectionReference rooms = db.collection("rooms");
 
         // ECO PODS
-        addRoom(batch, rooms, room("Eco Pod A", "Eco-Pod",
-                "Compact pod built with recycled materials; skylight & solar power.",
-                12000, 2, "eco_pod",
-                "https://images.unsplash.com/photo-1505691723518-36a5ac3b2d53"));
-        addRoom(batch, rooms, room("Eco Pod B", "Eco-Pod",
-                "Minimalist pod near herb garden; great stargazing.",
-                12500, 2, "eco_pod",
-                "https://images.unsplash.com/photo-1519710164239-da123dc03ef4"));
-        addRoom(batch, rooms, room("Eco Pod C", "Eco-Pod",
-                "Cozy pod with bamboo interior, low‑energy AC.",
-                11800, 2, "eco_pod",
-                "https://images.unsplash.com/photo-1501183638710-841dd1904471"));
+        addRoom(batch, rooms, room("Eco Pod Queen Retreat", "Queen Bedroom",
+                "Compact pod with queen bed, skylight, and solar-cooled airflow.",
+                18500, 2, "eco_pod",
+                "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb"));
+        addRoom(batch, rooms, room("Eco Pod King Escape", "King Bedroom",
+                "Spacious pod featuring king bed, bamboo finishes, and private deck.",
+                21500, 2, "eco_pod",
+                "https://images.unsplash.com/photo-1568605114967-8130f3a36994"));
+        addRoom(batch, rooms, room("Eco Pod Family Haven", "Family Bedroom",
+                "Interconnected pods with a queen, twin bunks, and reading nook.",
+                25500, 4, "eco_pod",
+                "https://images.unsplash.com/photo-1559599788-86c2f8d04d98"));
 
         // MOUNTAIN CABINS
-        addRoom(batch, rooms, room("Mountain Cabin 1", "Cabin",
-                "Rustic cabin with fireplace and panoramic mountain view.",
-                26000, 3, "mountain_cabin",
-                "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"));
-        addRoom(batch, rooms, room("Mountain Cabin 2", "Cabin",
-                "Two‑bedroom timber cabin; balcony & hammock.",
-                28500, 4, "mountain_cabin",
+        addRoom(batch, rooms, room("Mountain Cabin Queen Lookout", "Queen Bedroom",
+                "Warm timber cabin with queen bed, fireplace, and terrace view.",
+                26500, 2, "mountain_cabin",
+                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e"));
+        addRoom(batch, rooms, room("Mountain Cabin King Summit", "King Bedroom",
+                "King suite boasting vaulted ceilings, soaking tub, and ridge balcony.",
+                31500, 3, "mountain_cabin",
+                "https://images.unsplash.com/photo-1439130490301-25e322d88054"));
+        addRoom(batch, rooms, room("Mountain Cabin Family Lodge", "Family Bedroom",
+                "Two-bedroom family lodge with loft bunks and kitchenette.",
+                36500, 5, "mountain_cabin",
                 "https://images.unsplash.com/photo-1505691938895-1758d7feb511"));
-        addRoom(batch, rooms, room("Deluxe Mountain Suite", "Cabin",
-                "Spacious suite, kitchenette, ridge‑line view.",
-                32000, 5, "mountain_cabin",
-                "https://images.unsplash.com/photo-1496412705862-e0088f16f791"));
 
         // RIVER HUTS
-        addRoom(batch, rooms, room("River Hut A", "Hut",
-                "Thatched hut by the river; mosquito nets; solar lamps.",
-                18000, 2, "river_hut",
-                "https://images.unsplash.com/photo-1505692794403-34d4982f88aa"));
-        addRoom(batch, rooms, room("River Hut B", "Hut",
-                "Open‑air veranda, reed walls, gentle river breeze.",
-                19500, 3, "river_hut",
+        addRoom(batch, rooms, room("River Hut Queen Breeze", "Queen Bedroom",
+                "Riverside hut with queen canopy bed and open-air lounge.",
+                20500, 2, "river_hut",
+                "https://images.unsplash.com/photo-1505691723518-36a5ac3b2d53"));
+        addRoom(batch, rooms, room("River Hut King Drift", "King Bedroom",
+                "Waterfront hut featuring king bed, daybed, and bamboo shower.",
+                23500, 2, "river_hut",
+                "https://images.unsplash.com/photo-1470246973918-29a93221c455"));
+        addRoom(batch, rooms, room("River Hut Family Cove", "Family Bedroom",
+                "Dual-room family hut with queen master, twin bunks, and hammocks.",
+                27500, 4, "river_hut",
                 "https://images.unsplash.com/photo-1484154218962-a197022b5858"));
-        addRoom(batch, rooms, room("Family River Hut", "Hut",
-                "Family‑sized hut with two rooms and eco‑fans.",
-                21000, 4, "river_hut",
-                "https://images.unsplash.com/photo-1499696010180-025ef6e1a8f6"));
 
         batch.commit()
                 .addOnSuccessListener(unused -> {
