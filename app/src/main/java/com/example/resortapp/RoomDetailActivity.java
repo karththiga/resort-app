@@ -6,14 +6,16 @@ import android.view.View;
 import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AlertDialog;
 import com.bumptech.glide.Glide;
 import com.example.resortapp.model.Room;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -22,6 +24,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class RoomDetailActivity extends AppCompatActivity {
@@ -32,6 +35,8 @@ public class RoomDetailActivity extends AppCompatActivity {
 
     private Room room;
     private Long startUtc = null, endUtc = null; // UTC millis
+
+    private static final int DEFAULT_ROOM_STOCK = 5;
 
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
@@ -166,6 +171,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         TextInputEditText etPromoCode = dialogView.findViewById(R.id.etPromoCode);
         MaterialButton btnApplyPromo = dialogView.findViewById(R.id.btnApplyPromo);
         MaterialButton btnConfirm = dialogView.findViewById(R.id.btnConfirm);
+        CircularProgressIndicator progressBooking = dialogView.findViewById(R.id.progressBooking);
         View btnClose = dialogView.findViewById(R.id.btnClose);
         SwitchMaterial switchGreenStay = dialogView.findViewById(R.id.switchGreenStay);
 
@@ -175,7 +181,8 @@ public class RoomDetailActivity extends AppCompatActivity {
                 tilCardName == null || tilCardNumber == null || tilExpiry == null || tilCvv == null ||
                 etCardName == null || etCardNumber == null || etExpiry == null || etCvv == null ||
                 tilPromoCode == null || etPromoCode == null || btnApplyPromo == null ||
-                btnConfirm == null || btnClose == null || switchGreenStay == null) {
+                btnConfirm == null || btnClose == null || switchGreenStay == null ||
+                progressBooking == null) {
             return;
         }
 
@@ -311,15 +318,103 @@ public class RoomDetailActivity extends AppCompatActivity {
                     return;
                 }
 
-                createBooking(uid, nights, pricePerNight, amountDue[0], "CARD", "PAID");
+                attemptBooking(uid, nights, pricePerNight, amountDue[0],
+                        "CARD", "PAID", btnConfirm, progressBooking, dialog);
             } else {
-                createBooking(uid, nights, pricePerNight, amountDue[0], "PAY_AT_HOTEL", "PENDING");
+                attemptBooking(uid, nights, pricePerNight, amountDue[0],
+                        "PAY_AT_HOTEL", "PENDING", btnConfirm, progressBooking, dialog);
             }
-
-            dialog.dismiss();
         });
 
         dialog.show();
+    }
+
+    private void attemptBooking(String uid,
+                                long nights,
+                                double pricePerNight,
+                                double total,
+                                String paymentMethod,
+                                String paymentStatus,
+                                MaterialButton btnConfirm,
+                                CircularProgressIndicator progressBooking,
+                                BottomSheetDialog dialog) {
+        btnConfirm.setEnabled(false);
+        progressBooking.setVisibility(View.VISIBLE);
+        progressBooking.setIndeterminate(true);
+
+        Timestamp checkInTs = new Timestamp(new Date(startUtc));
+        Timestamp checkOutTs = new Timestamp(new Date(endUtc));
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.runTransaction(transaction -> {
+                    Query query = db.collection("bookings")
+                            .whereEqualTo("status", "CONFIRMED")
+                            .whereEqualTo("roomId", room.getId())
+                            .whereLessThan("checkIn", checkOutTs);
+
+                    QuerySnapshot prefetch;
+                    try {
+                        prefetch = Tasks.await(query.get());
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+
+                    int overlapping = 0;
+                    for (DocumentSnapshot doc : prefetch.getDocuments()) {
+                        DocumentSnapshot existing = transaction.get(doc.getReference());
+                        Timestamp existingCheckIn = existing.getTimestamp("checkIn");
+                        Timestamp existingCheckOut = existing.getTimestamp("checkOut");
+                        if (existingCheckIn == null || existingCheckOut == null) continue;
+
+                        long existingStart = existingCheckIn.toDate().getTime();
+                        long existingEnd = existingCheckOut.toDate().getTime();
+                        if (existingStart < endUtc && existingEnd > startUtc) {
+                            overlapping++;
+                        }
+                    }
+
+                    if (overlapping >= DEFAULT_ROOM_STOCK) {
+                        throw new FirebaseFirestoreException(
+                                "NO_AVAILABILITY",
+                                FirebaseFirestoreException.Code.ABORTED);
+                    }
+
+                    DocumentReference newBookingRef = db.collection("bookings").document();
+                    transaction.set(newBookingRef,
+                            buildBookingPayload(uid, nights, pricePerNight, total, paymentMethod,
+                                    paymentStatus, checkInTs, checkOutTs));
+                    return null;
+                })
+                .addOnSuccessListener(ignored -> {
+                    progressBooking.setVisibility(View.GONE);
+                    Toast.makeText(this, "Booked! See in My Bookings.", Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    btnConfirm.setEnabled(true);
+                    progressBooking.setVisibility(View.GONE);
+                    if (e instanceof FirebaseFirestoreException) {
+                        FirebaseFirestoreException ffe = (FirebaseFirestoreException) e;
+                        if (ffe.getCode() == FirebaseFirestoreException.Code.ABORTED &&
+                                "NO_AVAILABILITY".equals(ffe.getMessage())) {
+                            showNoAvailabilityDialog();
+                            return;
+                        }
+                    }
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+                });
+    }
+
+    private void showNoAvailabilityDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.room_detail_no_availability_dialog_title)
+                .setMessage(R.string.room_detail_no_availability_dialog_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     private String getTextFromField(TextInputEditText editText) {
@@ -418,8 +513,14 @@ public class RoomDetailActivity extends AppCompatActivity {
         return digitsOnly.matches("\\d{3,4}");
     }
 
-    private void createBooking(String uid, long nights, double pricePerNight, double total,
-                               String paymentMethod, String paymentStatus) {
+    private Map<String, Object> buildBookingPayload(String uid,
+                                                    long nights,
+                                                    double pricePerNight,
+                                                    double total,
+                                                    String paymentMethod,
+                                                    String paymentStatus,
+                                                    Timestamp checkInTs,
+                                                    Timestamp checkOutTs) {
         Map<String, Object> b = new HashMap<>();
         b.put("kind", "ROOM");
         b.put("userId", uid);
@@ -427,21 +528,14 @@ public class RoomDetailActivity extends AppCompatActivity {
         b.put("roomName", room.getName() != null ? room.getName() : room.getType());
         b.put("roomImageUrl", room.getImageUrl());
         b.put("priceAtBooking", pricePerNight);
-        b.put("checkIn", new Timestamp(new Date(startUtc)));
-        b.put("checkOut", new Timestamp(new Date(endUtc)));
+        b.put("checkIn", checkInTs);
+        b.put("checkOut", checkOutTs);
         b.put("nights", nights);
         b.put("totalAmount", total);
         b.put("status", "CONFIRMED");
         b.put("paymentMethod", paymentMethod);
         b.put("paymentStatus", paymentStatus);
         b.put("createdAt", FieldValue.serverTimestamp());
-
-        FirebaseFirestore.getInstance().collection("bookings").add(b)
-                .addOnSuccessListener(ref -> {
-                    Toast.makeText(this, "Booked! See in My Bookings.", Toast.LENGTH_LONG).show();
-                    finish();
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show());
+        return b;
     }
 }
