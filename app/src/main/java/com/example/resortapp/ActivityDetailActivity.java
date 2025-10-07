@@ -68,12 +68,14 @@ public class ActivityDetailActivity extends AppCompatActivity {
                     tvDesc.setText(desc != null && !desc.trim().isEmpty()
                             ? desc
                             : getString(R.string.activity_detail_no_description));
-                    if (capacity != null && capacity > 0) {
-                        capacityPerSession = capacity;
-                        tvMeta.setVisibility(View.VISIBLE);
-                        tvMeta.setText(getString(R.string.activity_detail_meta_capacity_format, capacity));
-                    } else {
-                        tvMeta.setVisibility(View.GONE);
+                    if (tvMeta != null) {
+                        if (capacity != null && capacity > 0) {
+                            capacityPerSession = capacity;
+                            tvMeta.setVisibility(View.VISIBLE);
+                            tvMeta.setText(getString(R.string.activity_detail_meta_capacity_format, capacity));
+                        } else {
+                            tvMeta.setVisibility(View.GONE);
+                        }
                     }
                     Glide.with(this).load(imageUrl).placeholder(R.drawable.placeholder_room).into(img);
                 })
