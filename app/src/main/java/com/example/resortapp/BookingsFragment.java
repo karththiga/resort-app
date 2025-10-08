@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -177,7 +178,7 @@ public class BookingsFragment extends Fragment {
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.booking_activity_update_positive, null);
 
-        android.app.AlertDialog dialog = builder.create();
+        AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
             Button positiveButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(v -> {
