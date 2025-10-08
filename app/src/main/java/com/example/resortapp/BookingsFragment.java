@@ -59,13 +59,15 @@ public class BookingsFragment extends Fragment {
     private View emptyState;
     private TextView emptyTitle;
     private TextView emptySubtitle;
+    private final List<BookingItem> cachedRooms = new ArrayList<>();
+    private final List<BookingItem> cachedActivities = new ArrayList<>();
     private final TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
             String newKind = tab.getPosition() == 1 ? "ACTIVITY" : "ROOM";
             if (!TextUtils.equals(currentKind, newKind)) {
                 currentKind = newKind;
-                subscribe();
+                renderCurrentKind();
             }
         }
 
@@ -120,47 +122,51 @@ public class BookingsFragment extends Fragment {
             reg.remove();
             reg = null;
         }
-        if (adapter != null) {
-            adapter.submit(new ArrayList<>());
-        }
-        updateEmptyState(currentKind, true);
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) {
-            if (adapter != null) {
-                adapter.submit(new ArrayList<>());
-            }
+            cachedRooms.clear();
+            cachedActivities.clear();
+            renderCurrentKind();
             return;
         }
-        final String kindForQuery = currentKind;
 
         Query q = FirebaseFirestore.getInstance().collection("bookings")
                 .whereEqualTo("userId", uid)
-                .whereEqualTo("kind", kindForQuery)
                 .orderBy("createdAt", Query.Direction.DESCENDING);
 
         reg = q.addSnapshotListener((qs, e) -> {
-            if (!TextUtils.equals(currentKind, kindForQuery)) {
-                return;
-            }
             if (e != null || qs == null) {
-                updateEmptyState(kindForQuery, true);
-                if (adapter != null) {
-                    adapter.submit(new ArrayList<>());
-                }
+                cachedRooms.clear();
+                cachedActivities.clear();
+                renderCurrentKind();
                 return;
             }
-            List<BookingItem> items = new ArrayList<>();
+            cachedRooms.clear();
+            cachedActivities.clear();
             for (DocumentSnapshot d : qs.getDocuments()) {
                 BookingItem item = BookingItem.from(d);
-                if (TextUtils.equals(kindForQuery, item.kind)) {
-                    items.add(item);
+                if ("ACTIVITY".equals(item.kind)) {
+                    cachedActivities.add(item);
+                } else {
+                    cachedRooms.add(item);
                 }
             }
-            if (adapter != null) {
-                adapter.submit(items);
-            }
-            updateEmptyState(kindForQuery, items.isEmpty());
+            renderCurrentKind();
         });
+    }
+
+    private void renderCurrentKind() {
+        if (adapter == null) {
+            return;
+        }
+        List<BookingItem> source;
+        if ("ACTIVITY".equals(currentKind)) {
+            source = new ArrayList<>(cachedActivities);
+        } else {
+            source = new ArrayList<>(cachedRooms);
+        }
+        adapter.submit(source);
+        updateEmptyState(currentKind, source.isEmpty());
     }
 
     private void updateEmptyState(@NonNull String kind, boolean empty) {
