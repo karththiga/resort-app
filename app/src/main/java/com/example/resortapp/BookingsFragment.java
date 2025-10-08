@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,10 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.Timestamp;
@@ -56,6 +55,27 @@ public class BookingsFragment extends Fragment {
     private BookingAdapter adapter;
     private ListenerRegistration reg;
     private String currentKind = "ROOM"; // default
+    private TabLayout tabLayout;
+    private final TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
+        @Override
+        public void onTabSelected(TabLayout.Tab tab) {
+            String newKind = tab.getPosition() == 1 ? "ACTIVITY" : "ROOM";
+            if (!TextUtils.equals(currentKind, newKind)) {
+                currentKind = newKind;
+                subscribe();
+            }
+        }
+
+        @Override
+        public void onTabUnselected(TabLayout.Tab tab) {
+            // no-op
+        }
+
+        @Override
+        public void onTabReselected(TabLayout.Tab tab) {
+            // no-op
+        }
+    };
 
     @Nullable
     @Override
@@ -76,15 +96,12 @@ public class BookingsFragment extends Fragment {
         });
         rv.setAdapter(adapter);
 
-        ChipGroup chips = v.findViewById(R.id.chipGroup);
-        chips.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds == null || checkedIds.isEmpty()) {
-                return;
-            }
-            int id = checkedIds.get(0);
-            currentKind = (id == R.id.chipActivities) ? "ACTIVITY" : "ROOM";
-            subscribe();
-        });
+        tabLayout = v.findViewById(R.id.tabLayoutBookings);
+        tabLayout.addOnTabSelectedListener(tabSelectedListener);
+        TabLayout.Tab defaultTab = tabLayout.getTabAt("ACTIVITY".equals(currentKind) ? 1 : 0);
+        if (defaultTab != null) {
+            defaultTab.select();
+        }
 
         subscribe();
 
@@ -125,6 +142,10 @@ public class BookingsFragment extends Fragment {
             rv.setAdapter(null);
         }
         adapter = null;
+        if (tabLayout != null) {
+            tabLayout.removeOnTabSelectedListener(tabSelectedListener);
+            tabLayout = null;
+        }
         if (reg != null) {
             reg.remove();
             reg = null;
@@ -178,7 +199,7 @@ public class BookingsFragment extends Fragment {
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.booking_activity_update_positive, null);
 
-        AlertDialog dialog = builder.create();
+        android.app.AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
             Button positiveButton = dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE);
             positiveButton.setOnClickListener(v -> {

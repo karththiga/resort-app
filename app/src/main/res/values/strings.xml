@@ -150,5 +150,7 @@
     <string name="error_card_number_invalid">Enter a valid card number.</string>
     <string name="error_card_expiry_invalid">Enter a valid future expiry date.</string>
     <string name="error_card_cvv_invalid">Enter the 3 or 4 digit security code.</string>
+    <string name="bookings_tab_rooms">Rooms</string>
+    <string name="bookings_tab_activities">Activities</string>
 
 </resources>
