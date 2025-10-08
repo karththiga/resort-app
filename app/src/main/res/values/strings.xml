@@ -46,6 +46,20 @@
 
     <string name="bookings">My Bookings</string>
     <string name="bookings_desc">Rooms and activities</string>
+    <string name="booking_action_edit">Edit reservation</string>
+    <string name="booking_action_delete">Cancel reservation</string>
+    <string name="booking_activity_update_dialog_title">Update your reservation</string>
+    <string name="booking_activity_update_dialog_subtitle">Change the date or number of participants for this activity.</string>
+    <string name="booking_activity_update_selected_date_label">Scheduled date</string>
+    <string name="booking_activity_update_pick_date">Change date</string>
+    <string name="booking_activity_update_participants_hint">Participants</string>
+    <string name="booking_activity_update_positive">Save changes</string>
+    <string name="booking_activity_update_success">Reservation updated.</string>
+    <string name="booking_activity_delete_confirm_title">Cancel this activity?</string>
+    <string name="booking_activity_delete_confirm_message">This will cancel your activity reservation. You can book it again later if there is availability.</string>
+    <string name="booking_activity_delete_success">Reservation cancelled.</string>
+    <string name="booking_activity_update_validation_date">Select a date to continue.</string>
+    <string name="booking_activity_update_validation_participants">Enter how many guests will join.</string>
 
     <string name="eco_list_title">Eco Highlights</string>
     <string name="eco_list_subtitle">Explore how we nurture the islands biodiversity and champion sustainable travel.</string>
@@ -136,5 +150,11 @@
     <string name="error_card_number_invalid">Enter a valid card number.</string>
     <string name="error_card_expiry_invalid">Enter a valid future expiry date.</string>
     <string name="error_card_cvv_invalid">Enter the 3 or 4 digit security code.</string>
+    <string name="bookings_tab_rooms">Rooms</string>
+    <string name="bookings_tab_activities">Activities</string>
+    <string name="bookings_empty_room_title">No room reservations</string>
+    <string name="bookings_empty_room_message">Book a stay to see your room reservations here.</string>
+    <string name="bookings_empty_activity_title">No activity reservations</string>
+    <string name="bookings_empty_activity_message">Reserve an activity to have it appear in this list.</string>
 
 </resources>
