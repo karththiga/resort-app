@@ -2,6 +2,8 @@ package com.example.resortapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Patterns;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -51,6 +53,12 @@ public class RegisterActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        clearErrorOnTextChange(tilName);
+        clearErrorOnTextChange(tilEmail);
+        clearErrorOnTextChange(tilPhone);
+        clearErrorOnTextChange(tilPassword);
+        clearErrorOnTextChange(tilPreference);
 
         btnRegister.setOnClickListener(v -> doRegister());
         tvGoLogin.setOnClickListener(v -> startActivity(new Intent(this, LoginActivity.class)));
@@ -167,5 +175,25 @@ public class RegisterActivity extends AppCompatActivity {
         if (label.contains("mountain")) return "mountain_cabin";
         if (label.contains("river")) return "river_hut";
         return null;
+    }
+
+    private void clearErrorOnTextChange(TextInputLayout layout) {
+        if (layout.getEditText() == null) {
+            return;
+        }
+        layout.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (layout.getError() != null) {
+                    layout.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
     }
 }

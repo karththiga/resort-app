@@ -56,6 +56,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingTop">0dp</item>
         <item name="android:paddingBottom">0dp</item>
+        <item name="android:layout_height">60dp</item>
     </style>
 
     <style name="Widget.ResortApp.PrimaryButton" parent="Widget.MaterialComponents.Button">

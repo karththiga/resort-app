@@ -1,7 +1,9 @@
 package com.example.resortapp;
 
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,6 +33,8 @@ public class ResetPasswordActivity extends AppCompatActivity {
         tvBack  = findViewById(R.id.tvBack);
         tilEmail = findViewById(R.id.tilEmail);
         auth = FirebaseAuth.getInstance();
+
+        clearErrorOnTextChange();
 
         btnSend.setOnClickListener(v -> sendReset());
         tvBack.setOnClickListener(v -> finish());
@@ -70,5 +74,22 @@ public class ResetPasswordActivity extends AppCompatActivity {
                     }
                     btnSend.setEnabled(true);
                 });
+    }
+
+    private void clearErrorOnTextChange() {
+        etEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (tilEmail.getError() != null) {
+                    tilEmail.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
     }
 }

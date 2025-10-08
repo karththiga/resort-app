@@ -2,6 +2,8 @@ package com.example.resortapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,6 +44,9 @@ public class LoginActivity extends AppCompatActivity {
         tvForgot = findViewById(R.id.tvForgot);
         tilEmail = findViewById(R.id.tilEmail);
         tilPassword = findViewById(R.id.tilPassword);
+
+        clearErrorOnTextChange(etEmail, tilEmail);
+        clearErrorOnTextChange(etPassword, tilPassword);
 
         btnLogin.setOnClickListener(v -> login());
         tvGoRegister.setOnClickListener(v -> startActivity(new Intent(this, RegisterActivity.class)));
@@ -89,5 +94,22 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     btnLogin.setEnabled(true);
                 });
+    }
+
+    private void clearErrorOnTextChange(EditText editText, TextInputLayout layout) {
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (layout.getError() != null) {
+                    layout.setError(null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
     }
 }
