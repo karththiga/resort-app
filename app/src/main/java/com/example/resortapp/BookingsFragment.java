@@ -35,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.example.resortapp.util.NotificationRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -316,6 +317,19 @@ public class BookingsFragment extends Fragment {
                         if (!isAdded()) {
                             return;
                         }
+                        String uid = FirebaseAuth.getInstance().getUid();
+                        if (uid != null) {
+                            String activityId = !TextUtils.isEmpty(item.activityId) ? item.activityId : item.id;
+                            NotificationRepository.getInstance().recordActivityEvent(
+                                    uid,
+                                    item.id,
+                                    activityId,
+                                    item.roomName,
+                                    selectedDate != null ? new Timestamp(selectedDate.getTime()) : null,
+                                    participants,
+                                    "UPDATED",
+                                    "UPDATED");
+                        }
                         Toast.makeText(requireContext(), R.string.booking_activity_update_success, Toast.LENGTH_SHORT).show();
                         dialog.dismiss();
                     }
@@ -478,6 +492,20 @@ public class BookingsFragment extends Fragment {
                 .addOnSuccessListener(unused -> {
                     if (!isAdded()) {
                         return;
+                    }
+                    String uid = FirebaseAuth.getInstance().getUid();
+                    if (uid != null) {
+                        String activityId = !TextUtils.isEmpty(item.activityId) ? item.activityId : item.id;
+                        Timestamp start = item.checkIn != null ? new Timestamp(item.checkIn) : null;
+                        NotificationRepository.getInstance().recordActivityEvent(
+                                uid,
+                                item.id,
+                                activityId,
+                                item.roomName,
+                                start,
+                                item.participants,
+                                "CANCELLED",
+                                "CANCELLED");
                     }
                     Toast.makeText(requireContext(), R.string.booking_activity_delete_success, Toast.LENGTH_SHORT).show();
                 })

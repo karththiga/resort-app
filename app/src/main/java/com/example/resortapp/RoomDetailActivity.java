@@ -21,7 +21,14 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.*;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.example.resortapp.util.NotificationRepository;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -340,6 +347,7 @@ public class RoomDetailActivity extends AppCompatActivity {
         }
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference newBookingRef = db.collection("bookings").document();
         db.runTransaction(transaction -> {
                     Query query = db.collection("bookings")
                             .whereEqualTo("status", "CONFIRMED")
@@ -376,7 +384,6 @@ public class RoomDetailActivity extends AppCompatActivity {
                                 FirebaseFirestoreException.Code.ABORTED);
                     }
 
-                    DocumentReference newBookingRef = db.collection("bookings").document();
                     transaction.set(newBookingRef,
                             buildBookingPayload(uid, nights, pricePerNight, total, paymentMethod,
                                     paymentStatus, checkInTs, checkOutTs));
@@ -385,6 +392,15 @@ public class RoomDetailActivity extends AppCompatActivity {
                 .addOnSuccessListener(ignored -> {
                     progressBooking.setVisibility(View.GONE);
                     Toast.makeText(this, "Booked! See in My Bookings.", Toast.LENGTH_LONG).show();
+                    NotificationRepository.getInstance().recordRoomEvent(
+                            uid,
+                            newBookingRef.getId(),
+                            room.getId(),
+                            room.getName() != null ? room.getName() : room.getType(),
+                            checkInTs,
+                            checkOutTs,
+                            "CONFIRMED",
+                            "BOOKED");
                     dialog.dismiss();
                     finish();
                 })

@@ -14,6 +14,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.*;
+import com.example.resortapp.util.NotificationRepository;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -129,6 +130,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
         Timestamp nextDay = new Timestamp(cal.getTime());
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference newBookingRef = db.collection("bookings").document();
         setReserveInProgress(true);
 
         int finalParticipants = participants;
@@ -165,13 +167,21 @@ public class ActivityDetailActivity extends AppCompatActivity {
                                 FirebaseFirestoreException.Code.ABORTED);
                     }
 
-                    DocumentReference newBookingRef = db.collection("bookings").document();
                     transaction.set(newBookingRef, buildActivityBookingPayload(uid, finalParticipants, price, total, dayStart));
                     return null;
                 })
                 .addOnSuccessListener(ignored -> {
                     setReserveInProgress(false);
                     Toast.makeText(this, "Reserved! See in My Bookings.", Toast.LENGTH_LONG).show();
+                    NotificationRepository.getInstance().recordActivityEvent(
+                            uid,
+                            newBookingRef.getId(),
+                            activityDoc.getId(),
+                            activityDoc.getString("name"),
+                            dayStart,
+                            finalParticipants,
+                            "CONFIRMED",
+                            "BOOKED");
                     finish();
                 })
                 .addOnFailureListener(e -> {
