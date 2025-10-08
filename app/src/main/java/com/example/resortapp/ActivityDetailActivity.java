@@ -30,6 +30,8 @@ public class ActivityDetailActivity extends AppCompatActivity {
     private boolean reserveInProgress = false;
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
+    private static final int DEFAULT_ACTIVITY_CAPACITY = 10;
+
     @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
