@@ -26,7 +26,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
 
     private DocumentSnapshot activityDoc;
     private Long dateUtc = null; // activity day
-    private long capacityPerSession = DEFAULT_ACTIVITY_CAPACITY;
+    private long capacityPerSession = 0;
     private boolean reserveInProgress = false;
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
@@ -77,6 +77,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
                             tvMeta.setVisibility(View.VISIBLE);
                             tvMeta.setText(getString(R.string.activity_detail_meta_capacity_format, capacity));
                         } else {
+                            capacityPerSession = 0;
                             tvMeta.setVisibility(View.GONE);
                         }
                     }
@@ -107,6 +108,16 @@ public class ActivityDetailActivity extends AppCompatActivity {
         int participants = 1;
         try { participants = Integer.parseInt(etParticipants.getText().toString().trim()); } catch (Exception ignore) {}
         if (participants <= 0) { Toast.makeText(this, "Enter participants", Toast.LENGTH_SHORT).show(); return; }
+
+        final long maxCapacity = resolveActivityCapacity();
+        if (maxCapacity <= 0) {
+            showNoAvailabilityDialog();
+            return;
+        }
+        if (participants > maxCapacity) {
+            showNoAvailabilityDialog();
+            return;
+        }
 
         double price = activityDoc.getDouble("pricePerPerson") == null ? 0.0 : activityDoc.getDouble("pricePerPerson");
         double total = price * participants;
@@ -147,7 +158,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
                         }
                     }
 
-                    if (reserved + participants > capacityPerSession) {
+                    if (reserved + participants > maxCapacity) {
                         throw new FirebaseFirestoreException(
                                 "NO_AVAILABILITY",
                                 FirebaseFirestoreException.Code.ABORTED);
@@ -174,6 +185,18 @@ public class ActivityDetailActivity extends AppCompatActivity {
                     }
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private long resolveActivityCapacity() {
+        if (activityDoc == null) {
+            return capacityPerSession > 0 ? capacityPerSession : 0;
+        }
+        Long capacity = activityDoc.getLong("capacityPerSession");
+        if (capacity == null) {
+            return capacityPerSession > 0 ? capacityPerSession : 0;
+        }
+        capacityPerSession = Math.max(0, capacity);
+        return capacityPerSession;
     }
 
     private void setReserveInProgress(boolean inProgress) {

@@ -34,8 +34,6 @@ public class RoomsListActivity extends AppCompatActivity {
     private RoomKind selectedTypeFilter = null;
     private PriceFilter selectedPriceFilter = PriceFilter.ANY;
 
-    private static final int DEFAULT_ROOM_STOCK = 5;
-
     @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rooms_list);
@@ -206,13 +204,21 @@ public class RoomsListActivity extends AppCompatActivity {
             display.setType(displayName);
 
             int booked = bookingsCountByRoomId.getOrDefault(room.getId(), 0);
-            int available = DEFAULT_ROOM_STOCK - booked;
+            int totalCapacity = resolveRoomCapacity(room);
+            int available = totalCapacity - booked;
             if (available < 0) available = 0;
             display.setAvailableRooms(available);
             display.setSoldOut(available <= 0);
             filtered.add(display);
         }
         adapter.submit(filtered);
+    }
+
+    private int resolveRoomCapacity(Room room) {
+        if (room == null) return 0;
+        Integer capacity = room.getCapacity();
+        if (capacity == null) return 0;
+        return Math.max(0, capacity);
     }
 
     private String human(String code){
