@@ -128,8 +128,8 @@ public class HomeFragment extends Fragment {
                 info.setId(d.getId());
                 rows.add(Pair.create(info, d.getTimestamp("createdAt")));
             }
-            rows.sort((a, b) -> {
-                long bTime = b.second != null ? b.second.toDate().getTime() : Long.MIN_VALUE;
+            rows.sort((a, n) -> {
+                long bTime = n.second != null ? n.second.toDate().getTime() : Long.MIN_VALUE;
                 long aTime = a.second != null ? a.second.toDate().getTime() : Long.MIN_VALUE;
                 return Long.compare(bTime, aTime);
             });

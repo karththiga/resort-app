@@ -48,11 +48,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="-48dp"
-                android:layout_marginEnd="16dp"
                 android:clipToOutline="false"
-                app:cardCornerRadius="24dp"
                 app:cardElevation="8dp">
 
                 <LinearLayout
@@ -155,7 +151,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="16dp"
                                 android:layout_weight="1"
-                                android:text="Tap to add check-in & check-out"
+                                android:text="Tap to add check-in and check-out"
                                 android:textColor="@color/secondaryTextColor"
                                 android:textSize="14sp" />
                         </LinearLayout>

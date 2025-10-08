@@ -131,6 +131,7 @@ public class ActivityDetailActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         setReserveInProgress(true);
 
+        int finalParticipants = participants;
         db.runTransaction(transaction -> {
                     Query query = db.collection("bookings")
                             .whereEqualTo("status", "CONFIRMED")
@@ -158,14 +159,14 @@ public class ActivityDetailActivity extends AppCompatActivity {
                         }
                     }
 
-                    if (reserved + participants > maxCapacity) {
+                    if (reserved + finalParticipants > maxCapacity) {
                         throw new FirebaseFirestoreException(
                                 "NO_AVAILABILITY",
                                 FirebaseFirestoreException.Code.ABORTED);
                     }
 
                     DocumentReference newBookingRef = db.collection("bookings").document();
-                    transaction.set(newBookingRef, buildActivityBookingPayload(uid, participants, price, total, dayStart));
+                    transaction.set(newBookingRef, buildActivityBookingPayload(uid, finalParticipants, price, total, dayStart));
                     return null;
                 })
                 .addOnSuccessListener(ignored -> {
