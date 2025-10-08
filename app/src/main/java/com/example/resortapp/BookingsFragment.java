@@ -139,8 +139,14 @@ public class BookingsFragment extends Fragment {
                 .orderBy("createdAt", Query.Direction.DESCENDING);
 
         reg = q.addSnapshotListener((qs, e) -> {
+            if (!TextUtils.equals(currentKind, kindForQuery)) {
+                return;
+            }
             if (e != null || qs == null) {
                 updateEmptyState(kindForQuery, true);
+                if (adapter != null) {
+                    adapter.submit(new ArrayList<>());
+                }
                 return;
             }
             List<BookingItem> items = new ArrayList<>();
@@ -150,13 +156,15 @@ public class BookingsFragment extends Fragment {
                     items.add(item);
                 }
             }
-            adapter.submit(items);
+            if (adapter != null) {
+                adapter.submit(items);
+            }
             updateEmptyState(kindForQuery, items.isEmpty());
         });
     }
 
     private void updateEmptyState(@NonNull String kind, boolean empty) {
-        if (rv == null || emptyState == null || emptyTitle == null || emptySubtitle == null) {
+        if (!TextUtils.equals(currentKind, kind) || rv == null || emptyState == null || emptyTitle == null || emptySubtitle == null) {
             return;
         }
         rv.setVisibility(empty ? View.GONE : View.VISIBLE);
