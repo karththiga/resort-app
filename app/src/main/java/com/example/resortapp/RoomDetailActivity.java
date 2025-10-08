@@ -36,8 +36,6 @@ public class RoomDetailActivity extends AppCompatActivity {
     private Room room;
     private Long startUtc = null, endUtc = null; // UTC millis
 
-    private static final int DEFAULT_ROOM_STOCK = 5;
-
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
 
     @Override protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -333,6 +331,14 @@ public class RoomDetailActivity extends AppCompatActivity {
         Timestamp checkInTs = new Timestamp(new Date(startUtc));
         Timestamp checkOutTs = new Timestamp(new Date(endUtc));
 
+        final int maxCapacity = resolveRoomInventoryCapacity();
+        if (maxCapacity <= 0) {
+            progressBooking.setVisibility(View.GONE);
+            btnConfirm.setEnabled(true);
+            showNoAvailabilityDialog();
+            return;
+        }
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.runTransaction(transaction -> {
                     Query query = db.collection("bookings")
@@ -364,7 +370,7 @@ public class RoomDetailActivity extends AppCompatActivity {
                         }
                     }
 
-                    if (overlapping >= DEFAULT_ROOM_STOCK) {
+                    if (overlapping >= maxCapacity) {
                         throw new FirebaseFirestoreException(
                                 "NO_AVAILABILITY",
                                 FirebaseFirestoreException.Code.ABORTED);
@@ -395,6 +401,17 @@ public class RoomDetailActivity extends AppCompatActivity {
                     }
                     Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
                 });
+    }
+
+    private int resolveRoomInventoryCapacity() {
+        if (room == null) {
+            return 0;
+        }
+        Integer capacity = room.getCapacity();
+        if (capacity == null) {
+            return 0;
+        }
+        return Math.max(0, capacity);
     }
 
     private void showNoAvailabilityDialog() {
