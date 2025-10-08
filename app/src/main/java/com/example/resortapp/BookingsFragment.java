@@ -56,6 +56,9 @@ public class BookingsFragment extends Fragment {
     private ListenerRegistration reg;
     private String currentKind = "ROOM"; // default
     private TabLayout tabLayout;
+    private View emptyState;
+    private TextView emptyTitle;
+    private TextView emptySubtitle;
     private final TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
@@ -96,6 +99,10 @@ public class BookingsFragment extends Fragment {
         });
         rv.setAdapter(adapter);
 
+        emptyState = v.findViewById(R.id.layoutEmptyBookings);
+        emptyTitle = v.findViewById(R.id.tvEmptyTitle);
+        emptySubtitle = v.findViewById(R.id.tvEmptySubtitle);
+
         tabLayout = v.findViewById(R.id.tabLayoutBookings);
         tabLayout.addOnTabSelectedListener(tabSelectedListener);
         TabLayout.Tab defaultTab = tabLayout.getTabAt("ACTIVITY".equals(currentKind) ? 1 : 0);
@@ -113,26 +120,57 @@ public class BookingsFragment extends Fragment {
             reg.remove();
             reg = null;
         }
+        if (adapter != null) {
+            adapter.submit(new ArrayList<>());
+        }
+        updateEmptyState(currentKind, true);
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) {
-            adapter.submit(new ArrayList<>());
+            if (adapter != null) {
+                adapter.submit(new ArrayList<>());
+            }
             return;
         }
+        final String kindForQuery = currentKind;
+
         Query q = FirebaseFirestore.getInstance().collection("bookings")
                 .whereEqualTo("userId", uid)
-                .whereEqualTo("kind", currentKind)
+                .whereEqualTo("kind", kindForQuery)
                 .orderBy("createdAt", Query.Direction.DESCENDING);
 
         reg = q.addSnapshotListener((qs, e) -> {
             if (e != null || qs == null) {
+                updateEmptyState(kindForQuery, true);
                 return;
             }
             List<BookingItem> items = new ArrayList<>();
             for (DocumentSnapshot d : qs.getDocuments()) {
-                items.add(BookingItem.from(d));
+                BookingItem item = BookingItem.from(d);
+                if (TextUtils.equals(kindForQuery, item.kind)) {
+                    items.add(item);
+                }
             }
             adapter.submit(items);
+            updateEmptyState(kindForQuery, items.isEmpty());
         });
+    }
+
+    private void updateEmptyState(@NonNull String kind, boolean empty) {
+        if (rv == null || emptyState == null || emptyTitle == null || emptySubtitle == null) {
+            return;
+        }
+        rv.setVisibility(empty ? View.GONE : View.VISIBLE);
+        emptyState.setVisibility(empty ? View.VISIBLE : View.GONE);
+        if (!empty) {
+            return;
+        }
+        if ("ACTIVITY".equals(kind)) {
+            emptyTitle.setText(R.string.bookings_empty_activity_title);
+            emptySubtitle.setText(R.string.bookings_empty_activity_message);
+        } else {
+            emptyTitle.setText(R.string.bookings_empty_room_title);
+            emptySubtitle.setText(R.string.bookings_empty_room_message);
+        }
     }
 
     @Override
@@ -142,6 +180,9 @@ public class BookingsFragment extends Fragment {
             rv.setAdapter(null);
         }
         adapter = null;
+        emptyState = null;
+        emptyTitle = null;
+        emptySubtitle = null;
         if (tabLayout != null) {
             tabLayout.removeOnTabSelectedListener(tabSelectedListener);
             tabLayout = null;

@@ -152,5 +152,9 @@
     <string name="error_card_cvv_invalid">Enter the 3 or 4 digit security code.</string>
     <string name="bookings_tab_rooms">Rooms</string>
     <string name="bookings_tab_activities">Activities</string>
+    <string name="bookings_empty_room_title">No room reservations</string>
+    <string name="bookings_empty_room_message">Book a stay to see your room reservations here.</string>
+    <string name="bookings_empty_activity_title">No activity reservations</string>
+    <string name="bookings_empty_activity_message">Reserve an activity to have it appear in this list.</string>
 
 </resources>
