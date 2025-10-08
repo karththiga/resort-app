@@ -233,9 +233,10 @@
                 android:text="@string/logout_positive"
                 app:cornerRadius="16dp" />
 
+            <!-- bottom padding so last row is not hidden behind bottom nav -->
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="70dp" />
+                android:layout_height="100dp" />
 
         </LinearLayout>
 

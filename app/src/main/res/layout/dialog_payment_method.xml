@@ -49,7 +49,7 @@
                 android:contentDescription="@string/payment_dialog_close_content_description"
                 android:padding="8dp"
                 android:src="@drawable/ic_close_24"
-                android:tint="@color/secondaryTextColor" />
+                app:tint="@color/secondaryTextColor" />
         </LinearLayout>
 
         <TextView
