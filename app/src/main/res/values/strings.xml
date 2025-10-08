@@ -60,7 +60,7 @@
     <string name="booking_activity_delete_success">Reservation cancelled.</string>
     <string name="booking_activity_update_validation_date">Select a date to continue.</string>
     <string name="booking_activity_update_validation_participants">Enter how many guests will join.</string>
-    <string name="bookings_error_loading">We couldn&#39;t refresh your bookings. Showing the last known list.</string>
+    <string name="bookings_error_loading">We could not refresh your bookings. Showing the last known list.</string>
 
     <string name="eco_list_title">Eco Highlights</string>
     <string name="eco_list_subtitle">Explore how we nurture the islands biodiversity and champion sustainable travel.</string>
