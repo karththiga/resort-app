@@ -248,25 +248,27 @@ public class BookingsFragment extends Fragment {
 
         tvTitle.setText(!TextUtils.isEmpty(item.roomName) ? item.roomName : getString(R.string.inbox_activity_default_title));
 
-        final long[] selectedDateUtc = new long[1];
+        final Calendar selectedDate = Calendar.getInstance();
         if (item.checkIn != null) {
-            selectedDateUtc[0] = item.checkIn.getTime();
+            selectedDate.setTime(item.checkIn);
         } else {
-            selectedDateUtc[0] = MaterialDatePicker.todayInUtcMilliseconds();
+            selectedDate.setTimeInMillis(MaterialDatePicker.todayInUtcMilliseconds());
         }
-        tvSelectedDate.setText(activityDateFormat.format(new Date(selectedDateUtc[0])));
+        normalizeCalendarToDayStart(selectedDate);
+        tvSelectedDate.setText(activityDateFormat.format(selectedDate.getTime()));
 
         btnPickDate.setOnClickListener(v -> {
             MaterialDatePicker.Builder<Long> builder = MaterialDatePicker.Builder.datePicker();
             builder.setTitleText(R.string.booking_activity_update_pick_date);
-            builder.setSelection(selectedDateUtc[0]);
+            builder.setSelection(selectedDate.getTimeInMillis());
             MaterialDatePicker<Long> picker = builder.build();
             picker.addOnPositiveButtonClickListener(selection -> {
                 if (selection == null) {
                     return;
                 }
-                selectedDateUtc[0] = selection;
-                tvSelectedDate.setText(activityDateFormat.format(new Date(selection)));
+                selectedDate.setTimeInMillis(selection);
+                normalizeCalendarToDayStart(selectedDate);
+                tvSelectedDate.setText(activityDateFormat.format(selectedDate.getTime()));
             });
             picker.show(getChildFragmentManager(), "activity_update_date");
         });
@@ -301,12 +303,13 @@ public class BookingsFragment extends Fragment {
                     tilParticipants.setError(getString(R.string.booking_activity_update_validation_participants));
                     return;
                 }
-                if (selectedDateUtc[0] <= 0) {
+                long selectedDateMillis = selectedDate.getTimeInMillis();
+                if (selectedDateMillis <= 0) {
                     Toast.makeText(requireContext(), R.string.booking_activity_update_validation_date, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 setUpdateDialogInProgress(true, progress, positiveButton, btnPickDate, etParticipants);
-                updateActivityReservation(item, selectedDateUtc[0], participants, new ActivityUpdateCallback() {
+                updateActivityReservation(item, selectedDateMillis, participants, new ActivityUpdateCallback() {
                     @Override
                     public void onSuccess() {
                         if (!isAdded()) {
@@ -353,9 +356,10 @@ public class BookingsFragment extends Fragment {
                                            int participants,
                                            @NonNull ActivityUpdateCallback callback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Timestamp dayStart = new Timestamp(new Date(dateUtc));
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(dateUtc);
+        normalizeCalendarToDayStart(cal);
+        Timestamp dayStart = new Timestamp(cal.getTime());
         cal.add(Calendar.DAY_OF_YEAR, 1);
         Timestamp nextDay = new Timestamp(cal.getTime());
 
@@ -445,6 +449,13 @@ public class BookingsFragment extends Fragment {
                         callback.onFailure(e);
                     }
                 });
+    }
+
+    private static void normalizeCalendarToDayStart(@NonNull Calendar cal) {
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
     }
 
     private void confirmDeleteActivity(@NonNull BookingItem item) {
