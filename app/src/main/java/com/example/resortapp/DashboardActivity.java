@@ -163,7 +163,7 @@ public class DashboardActivity extends AppCompatActivity implements InboxFragmen
 
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid != null) {
-            Query bookingQuery = db.collection("bookings")
+            Query bookingQuery = db.collection("booking_notifications")
                     .whereEqualTo("userId", uid);
             ListenerRegistration bookingReg = bookingQuery.addSnapshotListener((snapshots, e) -> {
                 bookingBadgeTimes.clear();

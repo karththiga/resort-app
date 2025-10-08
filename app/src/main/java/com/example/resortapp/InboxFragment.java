@@ -196,7 +196,7 @@ public class InboxFragment extends Fragment {
         registrations.add(genericReg);
 
         if (uid != null) {
-            Query bookingQuery = db.collection("bookings")
+            Query bookingQuery = db.collection("booking_notifications")
                     .whereEqualTo("userId", uid);
             ListenerRegistration bookingReg = bookingQuery.addSnapshotListener((snapshots, e) -> {
                 if (!isAdded()) {
@@ -306,6 +306,10 @@ public class InboxFragment extends Fragment {
         String status = safeString(doc.getString("status"));
         Timestamp createdAt = doc.getTimestamp("createdAt");
         long sortKey = createdAt != null ? createdAt.toDate().getTime() : 0L;
+        String reference = safeString(doc.getString("bookingId"));
+        if (TextUtils.isEmpty(reference)) {
+            reference = doc.getId();
+        }
 
         String title;
         String message;
@@ -323,7 +327,7 @@ public class InboxFragment extends Fragment {
             if (start != null) {
                 body.append(" ").append(getString(R.string.inbox_activity_when, formatDateTime(start.toDate())));
             }
-            body.append(" ").append(getString(R.string.inbox_reference, doc.getId()));
+            body.append(" ").append(getString(R.string.inbox_reference, reference));
             message = body.toString().trim();
         } else {
             String name = safeString(doc.getString("roomName"));
@@ -340,7 +344,7 @@ public class InboxFragment extends Fragment {
                 body.append(" ").append(getString(R.string.inbox_room_dates,
                         formatDate(checkIn.toDate()), formatDate(checkOut.toDate())));
             }
-            body.append(" ").append(getString(R.string.inbox_reference, doc.getId()));
+            body.append(" ").append(getString(R.string.inbox_reference, reference));
             message = body.toString().trim();
         }
 
