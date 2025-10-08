@@ -59,8 +59,11 @@ public class BookingsFragment extends Fragment {
     private View emptyState;
     private TextView emptyTitle;
     private TextView emptySubtitle;
+    private CircularProgressIndicator loadingIndicator;
     private final List<BookingItem> cachedRooms = new ArrayList<>();
     private final List<BookingItem> cachedActivities = new ArrayList<>();
+    private boolean roomsLoaded;
+    private boolean activitiesLoaded;
     private final TabLayout.OnTabSelectedListener tabSelectedListener = new TabLayout.OnTabSelectedListener() {
         @Override
         public void onTabSelected(TabLayout.Tab tab) {
@@ -104,6 +107,7 @@ public class BookingsFragment extends Fragment {
         emptyState = v.findViewById(R.id.layoutEmptyBookings);
         emptyTitle = v.findViewById(R.id.tvEmptyTitle);
         emptySubtitle = v.findViewById(R.id.tvEmptySubtitle);
+        loadingIndicator = v.findViewById(R.id.progressBookings);
 
         tabLayout = v.findViewById(R.id.tabLayoutBookings);
         tabLayout.addOnTabSelectedListener(tabSelectedListener);
@@ -122,10 +126,16 @@ public class BookingsFragment extends Fragment {
             reg.remove();
             reg = null;
         }
+        cachedRooms.clear();
+        cachedActivities.clear();
+        roomsLoaded = false;
+        activitiesLoaded = false;
+        renderCurrentKind();
+
         String uid = FirebaseAuth.getInstance().getUid();
         if (uid == null) {
-            cachedRooms.clear();
-            cachedActivities.clear();
+            roomsLoaded = true;
+            activitiesLoaded = true;
             renderCurrentKind();
             return;
         }
@@ -136,9 +146,13 @@ public class BookingsFragment extends Fragment {
 
         reg = q.addSnapshotListener((qs, e) -> {
             if (e != null || qs == null) {
-                cachedRooms.clear();
-                cachedActivities.clear();
-                renderCurrentKind();
+                if (isAdded() && e != null) {
+                    String message = e.getMessage();
+                    if (TextUtils.isEmpty(message)) {
+                        message = getString(R.string.bookings_error_loading);
+                    }
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                }
                 return;
             }
             cachedRooms.clear();
@@ -151,6 +165,8 @@ public class BookingsFragment extends Fragment {
                     cachedRooms.add(item);
                 }
             }
+            roomsLoaded = true;
+            activitiesLoaded = true;
             renderCurrentKind();
         });
     }
@@ -166,11 +182,20 @@ public class BookingsFragment extends Fragment {
             source = new ArrayList<>(cachedRooms);
         }
         adapter.submit(source);
-        updateEmptyState(currentKind, source.isEmpty());
+        boolean loaded = "ACTIVITY".equals(currentKind) ? activitiesLoaded : roomsLoaded;
+        updateEmptyState(currentKind, source.isEmpty(), loaded);
     }
 
-    private void updateEmptyState(@NonNull String kind, boolean empty) {
+    private void updateEmptyState(@NonNull String kind, boolean empty, boolean loaded) {
         if (!TextUtils.equals(currentKind, kind) || rv == null || emptyState == null || emptyTitle == null || emptySubtitle == null) {
+            return;
+        }
+        if (loadingIndicator != null) {
+            loadingIndicator.setVisibility(loaded ? View.GONE : View.VISIBLE);
+        }
+        if (!loaded) {
+            rv.setVisibility(View.GONE);
+            emptyState.setVisibility(View.GONE);
             return;
         }
         rv.setVisibility(empty ? View.GONE : View.VISIBLE);
@@ -197,6 +222,7 @@ public class BookingsFragment extends Fragment {
         emptyState = null;
         emptyTitle = null;
         emptySubtitle = null;
+        loadingIndicator = null;
         if (tabLayout != null) {
             tabLayout.removeOnTabSelectedListener(tabSelectedListener);
             tabLayout = null;
@@ -485,7 +511,14 @@ public class BookingsFragment extends Fragment {
             BookingItem i = new BookingItem();
             i.id = d.getId();
             String kind = d.getString("kind");
-            i.kind = kind != null ? kind : "ROOM";
+            String normalizedKind = kind != null ? kind.trim() : "";
+            if (!TextUtils.isEmpty(normalizedKind)) {
+                normalizedKind = normalizedKind.toUpperCase(Locale.US);
+            }
+            if (!"ACTIVITY".equals(normalizedKind)) {
+                normalizedKind = "ROOM";
+            }
+            i.kind = normalizedKind;
             if ("ACTIVITY".equals(i.kind)) {
                 i.roomName = d.getString("activityName");
                 i.roomImageUrl = d.getString("activityImageUrl");
